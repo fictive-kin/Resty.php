@@ -1,47 +1,81 @@
 <?php
 /**
- * Example:
- *
- * $resty = new RestyStream();
- * $resty->enableDebugging(true);
- * $resty->setCredentials('funkatron', '432b37e5514d78dbb9f562f29ac832be');
- * $resty->setBaseURL('http://local.gimmebar.com:9000/api/v0/');
- * $resp = $resty->get('tags');
- * print_r($resp);
- *
-*/
+ * A simple PHP library for doing RESTful HTTP stuff. Does *not* require the curl extension.
+ * @link https://github.com/fictivekin/resty.php
+ */
 class Resty
 {
 
+	/**
+	 * The version of this lib
+	 */
 	const VERSION = '0.3';
 
 	/**
-	 * undocumented variable
-	 *
-	 * @var bool
+	 * @var bool enables debugging output
 	 */
 	protected $debug = false;
 
+	/**
+	 * @var bool whether or not to auto-parse the response body as JSON or XML
+	 */
 	protected $parse_body = true;
 
+	/**
+	 * @var string
+	 * @see Resty::getUserAgent()
+	 */
 	protected $user_agent = null;
 
+	/**
+	 * @var string
+	 */
 	protected $base_url;
 
+	/**
+	 * Stores the last request hash
+	 * @var array
+	 */
 	protected $last_request;
+
+	/**
+	 * Stores the last response hash
+	 * @var array
+	 */
 	protected $last_response;
 
+	/**
+	 * stores anon func callbacks (because you can't store them as obj props
+	 * @var array
+	 */
 	protected $callbacks = array();
 
+	/**
+	 * username for basic auth
+	 * @var string
+	 */
 	protected $username;
+
+	/**
+	 * password for basic auth
+	 * @var string
+	 */
 	protected $password;
 
+	/**
+	 * content-types that will trigger JSON parsing of body
+	 * @var array
+	 */
 	public static $JSON_TYPES = array(
 		'application/json',
 		'text/json',
 		'text/x-json',
 	);
 
+	/**
+	 * content-types that will trigger XML parsing
+	 * @var array
+	 */
 	public static $XML_TYPES = array(
 		'application/xml',
 		'text/xml',
@@ -53,7 +87,16 @@ class Resty
 	);
 
 
-
+	/**
+	 * Passed opts can include
+	 * $opts['onRequestLog'] - an anonymous function that takes the Resty::last_request property as arg
+	 * $opts['onResponseLog'] - an anonymous function that takes the Resty::last_response property as arg
+	 *
+	 * @see Resty::last_request
+	 * @see Resty::last_response
+	 * @see Resty::sendRequest()
+	 * @param array $opts OPTIONAL array of options
+	 */
 	function __construct($opts=null) {
 		if (!empty($opts['onRequestLog']) && ($opts['onRequestLog'] instanceof Closure)) {
 			$this->callbacks['onRequestLog'] = $opts['onRequestLog'];
@@ -64,6 +107,11 @@ class Resty
 	}
 
 
+	/**
+	 * retrieve the last response we got
+	 * @param string $key just retrieve a given field from the hash
+	 * @return mixed
+	 */
 	public function getLastResponse($key=null) {
 		if (!isset($key)) {
 			return $this->last_response;
@@ -74,27 +122,57 @@ class Resty
 	}
 
 	/**
-	 * undocumented function
+	 * make a GET request
 	 *
-	 * @param int $method
-	 * @param array $querydata
-	 * @param array $headers
-	 * @param array $options
-	 * @return array
-	 * @author Ed Finkler
+	 * @param string the URL. This will be appended to the base_url, if any set
+	 * @param array $querydata hash of key/val pairs
+	 * @param array $headers hash of key/val pairs
+	 * @param array $options hash of key/val pairs ('timeout')
+	 * @return array the response hash
+	 * @see Resty::sendRequest()
 	 */
 	public function get($url, $querydata=null, $headers=null, $options=null) {
 		return $this->sendRequest($url, 'GET', $querydata, $headers, $options);
 	}
 
+	/**
+	 * make a POST request
+	 *
+	 * @param string the URL. This will be appended to the base_url, if any set
+	 * @param array $querydata hash of key/val pairs
+	 * @param array $headers hash of key/val pairs
+	 * @param array $options hash of key/val pairs ('timeout')
+	 * @return array the response hash
+	 * @see Resty::sendRequest()
+	 */
 	public function post($url, $querydata=null, $headers=null, $options=null) {
 		return $this->sendRequest($url, 'POST', $querydata, $headers, $options);
 	}
 
+	/**
+	 * make a PUT request
+	 *
+	 * @param string the URL. This will be appended to the base_url, if any set
+	 * @param array $querydata hash of key/val pairs
+	 * @param array $headers hash of key/val pairs
+	 * @param array $options hash of key/val pairs ('timeout')
+	 * @return array the response hash
+	 * @see Resty::sendRequest()
+	 */
 	public function put($url, $querydata=null, $headers=null, $options=null) {
 		return $this->sendRequest($url, 'PUT', $querydata, $headers, $options);
 	}
 
+	/**
+	 * make a DELETE request
+	 *
+	 * @param string the URL. This will be appended to the base_url, if any set
+	 * @param array $querydata hash of key/val pairs
+	 * @param array $headers hash of key/val pairs
+	 * @param array $options hash of key/val pairs ('timeout')
+	 * @return array the response hash
+	 * @see Resty::sendRequest()
+	 */
 	public function delete($url, $querydata=null, $headers=null, $options=null) {
 		return $this->sendRequest($url, 'DELETE', $querydata, $headers, $options);
 	}
@@ -278,6 +356,7 @@ class Resty
 
 	/**
 	 * enable or disable debugging. default is false
+	 * @param bool $state default FALSE
 	 */
 	public function debug($state=false) {
 		$state = (bool)$state;
@@ -286,23 +365,41 @@ class Resty
 
 	/**
 	 * enable or disable automatic parsing of body. default is true
+	 * @param bool $state default TRUE
 	 */
 	public function parseBody($state=true) {
 		$state = (bool)$state;
 		$this->parse_body = $state;
 	}
 
-
+	/**
+	 * Sets the base URL for all subsequent requests
+	 * @param string $base_url
+	 */
 	public function setBaseURL($base_url) {
 		$this->base_url = $base_url;
 	}
+
+	/**
+	 * retrieves the current Resty::$base_url
+	 * @return string
+	 */
 	public function getBaseURL() {
 		return $this->base_url;
 	}
 
+	/**
+	 * Sets the user-agent
+	 * @param string $user_agent
+	 */
 	public function setUserAgent($user_agent) {
 		$this->user_agent = $user_agent;
 	}
+
+	/**
+	 * Gets the current user agent. if Resty::$user_agent is not set, uses a default
+	 * @return string
+	 */
 	public function getUserAgent() {
 		if (empty($this->user_agent)) {
 			$this->user_agent = 'Resty ' . static::VERSION;
@@ -310,11 +407,19 @@ class Resty
 		return $this->user_agent;
 	}
 
-
+	/**
+	 * Sets credentials for http basic auth
+	 * @param string $username
+	 * @param string $password
+	 */
 	public function setCredentials($username, $password) {
 		$this->username = $username;
 		$this->password = $password;
 	}
+
+	/**
+	 * removes current credentials
+	 */
 	public function clearCredentials() {
 		$this->username = null;
 		$this->password = null;
@@ -323,9 +428,7 @@ class Resty
 	/**
 	 * logging helper
 	 *
-	 * @param string $msg
-	 * @return void
-	 * @author Ed Finkler
+	 * @param mixed $msg
 	 */
 	protected function log($msg) {
 
@@ -365,7 +468,11 @@ class Resty
 		return $str_headers;
 	}
 
-
+	/**
+	 * Extracts the headers of a response from the stream's meta data
+	 * @param array $meta
+	 * @return array
+	 */
 	protected function metaToHeaders($meta) {
 		$headers = array();
 		foreach ($meta['wrapper_data'] as $value) {
@@ -377,20 +484,26 @@ class Resty
 		return $headers;
 	}
 
+	/**
+	 * extracts the status code from the stream meta data
+	 * @param array $meta
+	 * @return integer
+	 */
 	protected function getStatusCode($meta) {
+		$matches = array();
 		preg_match("|\s(\d\d\d)\s|", $meta['wrapper_data'][0], $matches);
 		$status = (int)trim($matches[1]);
 		return $status;
 	}
 
 	/**
-	 * undocumented function
+	 * Sends the HTTP request and retrieves/parses the response
 	 *
 	 * @param string $url
 	 * @param string $method
-	 * @param string $querydata
-	 * @param string $headers
-	 * @param string $options
+	 * @param array $querydata OPTIONAL
+	 * @param array $headers OPTIONAL
+	 * @param array $options OPTIONAL
 	 * @return array
 	 * @author Ed Finkler
 	 */
@@ -522,8 +635,9 @@ class Resty
 	 * If we get back something that claims to be XML or JSON, parse it as such and assign to $resp['body']
 	 *
 	 * @param string $resp
-	 * @return void
-	 * @author Ed Finkler
+	 * @return string|object
+	 * @see Resty::$JSON_TYPES
+	 * @see Resty::$XML_TYPES
 	 */
 	protected function processResponseBody($resp) {
 
