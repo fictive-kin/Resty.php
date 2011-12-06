@@ -279,6 +279,8 @@ class Resty
 	}
 
 	/**
+	 * @see Resty::postFiles()
+	 * 
 	 * Stole this from the Amazon S3 class:
 	 *
 	 * Copyright (c) 2008, Donovan Schönknecht.  All rights reserved.
@@ -305,6 +307,7 @@ class Resty
 	 * POSSIBILITY OF SUCH DAMAGE.
 	 *
 	 * Amazon S3 is a trademark of Amazon.com, Inc. or its affiliates.
+	 * 
 	 */
 	protected function getMimeType($filepath) {
 
