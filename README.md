@@ -5,6 +5,7 @@ A simple PHP library for doing RESTful HTTP stuff. Does *not* require the curl e
 ## Example
 
 ```php
+<?php
 require __DIR__."/Resty.php";
 
 $resty = new Resty();
