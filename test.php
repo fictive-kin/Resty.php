@@ -8,7 +8,7 @@ $resty = new Resty(array(
 		var_dump($req);	
 	})
 );
-$resty->enableDebugging(true);
+$resty->debug(true);
 $resty->setBaseURL('https://gimmebar.com/api/v0/');
 $resp = $resty->get('public/assets/funkatron');
 print_r($resp);
