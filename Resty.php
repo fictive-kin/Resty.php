@@ -522,6 +522,11 @@ class Resty
 			$headers['Content-type'] = 'application/x-www-form-urlencoded';
 		}
 
+		// by default, pass the header "Connection: close"
+		if (!isset($headers['Connection'])) {
+			$headers['Connection'] = 'close';
+		}
+
 		// if we have a username and password, use it
 		if (isset($this->username) && isset($this->password) && !isset($headers['Authorization'])) {
 			$this->log("{$this->username}:{$this->password}");
