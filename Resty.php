@@ -9,7 +9,7 @@ class Resty
 	/**
 	 * The version of this lib
 	 */
-	const VERSION = '0.3';
+	const VERSION = '0.3.1';
 
 	/**
 	 * @var bool enables debugging output
