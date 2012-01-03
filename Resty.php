@@ -11,6 +11,8 @@ class Resty
 	 */
 	const VERSION = '0.3.1';
 
+	const DEFAULT_TIMEOUT = 240;
+
 	/**
 	 * @var bool enables debugging output
 	 */
@@ -108,7 +110,27 @@ class Resty
 
 
 	/**
+	 * retrieve the last request we sent
+	 *
+	 * valid keys are ['url', 'method', 'querydata', 'headers', 'options', 'opts']
+	 *
+	 * @param string $key just retrieve a given field from the hash
+	 * @return mixed
+	 */
+	public function getLastRequest($key=null) {
+		if (!isset($key)) {
+			return $this->last_request;
+		}
+
+		return $this->last_request[$key];
+
+	}
+
+	/**
 	 * retrieve the last response we got
+	 *
+	 * valid keys are ['meta', 'status', 'headers', 'body']
+	 *
 	 * @param string $key just retrieve a given field from the hash
 	 * @return mixed
 	 */
@@ -280,7 +302,7 @@ class Resty
 
 	/**
 	 * @see Resty::postFiles()
-	 * 
+	 *
 	 * Stole this from the Amazon S3 class:
 	 *
 	 * Copyright (c) 2008, Donovan Schönknecht.  All rights reserved.
@@ -307,7 +329,7 @@ class Resty
 	 * POSSIBILITY OF SUCH DAMAGE.
 	 *
 	 * Amazon S3 is a trademark of Amazon.com, Inc. or its affiliates.
-	 * 
+	 *
 	 */
 	protected function getMimeType($filepath) {
 
@@ -534,7 +556,7 @@ class Resty
 		}
 
 		// default timeout
-		$timeout = isset($options['timeout']) ? $options['timeout'] : 240;
+		$timeout = isset($options['timeout']) ? $options['timeout'] : static::DEFAULT_TIMEOUT;
 
 		$content = null;
 
