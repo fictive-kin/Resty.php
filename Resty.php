@@ -9,7 +9,7 @@ class Resty
 	/**
 	 * The version of this lib
 	 */
-	const VERSION = '0.3.1';
+	const VERSION = '0.3.2';
 
 	const DEFAULT_TIMEOUT = 240;
 
@@ -540,8 +540,8 @@ class Resty
 		}
 
 		// we need to supply a default content-type
-		if ($method === 'POST' && !isset($headers['Content-type'])) {
-			$headers['Content-type'] = 'application/x-www-form-urlencoded';
+		if (!isset($headers['Content-Type'])) {
+			$headers['Content-Type'] = 'application/x-www-form-urlencoded';
 		}
 
 		// by default, pass the header "Connection: close"
@@ -575,8 +575,11 @@ class Resty
 		// create an array of header strings from the hash
 		$headerarr = isset($headers) ? $this->buildHeadersArray($headers) : array();
 
-		// if this is a GET and we have some $content, append to URL
-		if ( ($method === 'GET') && isset($content)) {
+		// GET and DELETE should use the URL to pass data
+		$urlcontent = ('GET' === $method || 'DELETE' === $method);
+
+		// if this is a GET or DELETE and we have some $content, append to URL
+		if ($urlcontent && isset($content)) {
 			$url .= '?'.$content;
 		}
 
@@ -585,7 +588,7 @@ class Resty
 			'http'=>array(
 				'timeout'=>$timeout,
 				'method'=>$method,
-				'content'=>($method !== 'GET') ? $content : null,
+				'content'=> (!$urlcontent) ? $content : null,
 				'user_agent'=>$this->getUserAgent(),
 				'header'=>$headerarr,
 				'ignore_errors'=>1
