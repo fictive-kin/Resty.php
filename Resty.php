@@ -685,12 +685,14 @@ class Resty
 			if (in_array($content_type, static::$JSON_TYPES)) {
 
 				$this->log("Response body is JSON");
+				$resp['body_raw'] = $resp['body'];
 				$resp['body'] = json_decode($resp['body']);
 				return $resp;
 
 			} elseif (in_array($content_type, static::$XML_TYPES)) {
 
 				$this->log("Response body is XML");
+				$resp['body_raw'] = $resp['body'];
 				$resp['body'] = new \SimpleXMLElement($resp['body']);
 				return $resp;
 
