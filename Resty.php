@@ -627,6 +627,10 @@ class Resty
 
 		$this->log("Opening stream…");
 		$stream = fopen($url, 'r', false, $context);
+		if (!$stream) {
+			$this->log("Stream open failed.");
+			throw new Exception("Stream open failed");
+		}
 
 		$this->log("Getting metadata…");
 		$resp['meta'] = stream_get_meta_data($stream);
