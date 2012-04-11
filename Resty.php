@@ -9,7 +9,7 @@ class Resty
 	/**
 	 * The version of this lib
 	 */
-	const VERSION = '0.3.2';
+	const VERSION = '0.3.5';
 
 	const DEFAULT_TIMEOUT = 240;
 
@@ -17,6 +17,12 @@ class Resty
 	 * @var bool enables debugging output
 	 */
 	protected $debug = false;
+
+	/**
+	 * logging function (should be a Closure)
+	 * @var Closure
+	 */
+	protected $logger = null;
 
 	/**
 	 * @var bool whether or not to auto-parse the response body as JSON or XML
@@ -65,6 +71,11 @@ class Resty
 	protected $password;
 
 	/**
+	 * by default, silence the fopen warning if we can't open the stream
+	 */
+	protected $silence_fopen_warning = true;
+
+	/**
 	 * content-types that will trigger JSON parsing of body
 	 * @var array
 	 */
@@ -105,6 +116,9 @@ class Resty
 		}
 		if (!empty($opts['onResponseLog']) && ($opts['onResponseLog'] instanceof Closure)) {
 			$this->callbacks['onResponseLog'] = $opts['onResponseLog'];
+		}
+		if (!empty($opts['silence_fopen_warning']) && ($opts['silence_fopen_warning'] instanceof Closure)) {
+			$this->silenceFopenWarning($opts['silence_fopen_warning']);
 		}
 	}
 
@@ -380,12 +394,35 @@ class Resty
 	}
 
 	/**
-	 * enable or disable debugging. default is false
-	 * @param bool $state default FALSE
+	 * enable or disable debugging. If no arg passed, just returns current state
+	 * @param bool $state=null if not passed, state not changed
+	 * @return boolean the current state
 	 */
-	public function debug($state=false) {
-		$state = (bool)$state;
-		$this->debug = $state;
+	public function debug($state=null) {
+		if (isset($state)) {
+			$this->debug = (bool)$state;
+		}
+		return $this->debug;
+	}
+
+	/**
+	 * silence warnings from fopen when trying to open stream
+	 * @param  boolean $state=null optional, set the state
+	 * @return boolean the current state
+	 */
+	public function silenceFopenWarning($state=null) {
+		if (isset($state)) {
+			$this->silence_fopen_warning = (bool)$state;
+		}
+		return $this->silence_fopen_warning;
+	}
+
+	/**
+	 * sets an alternate logging method
+	 * @param Closure $logger
+	 */
+	public function setLogger(Closure $logger) {
+		$this->logger = $logger;
 	}
 
 	/**
@@ -451,34 +488,6 @@ class Resty
 	}
 
 	/**
-	 * logging helper
-	 *
-	 * @param mixed $msg
-	 */
-	protected function log($msg) {
-
-		if (!$this->debug) { return; }
-
-		$line = date(\DateTime::RFC822) . " :: ";
-
-		if (is_string($msg)) {
-			$line .= "{$msg}\n";
-		} else {
-			ob_start();
-			var_dump($msg);
-			$line = ob_get_clean();
-			$line .= "\n";
-		}
-
-		if (PHP_SAPI === 'cli') {
-			echo $line;
-		} else {
-			echo "<pre>$line</pre>\n";
-		}
-	}
-
-
-	/**
 	 * takes a set of key/val pairs and builds an array of raw header strings
 	 *
 	 * @param string $headers
@@ -516,7 +525,7 @@ class Resty
 	 */
 	protected function getStatusCode($meta) {
 		$matches = array();
-		preg_match("|\s(\d\d\d)\s|", $meta['wrapper_data'][0], $matches);
+		preg_match("|\s(\d\d\d)\s?|", $meta['wrapper_data'][0], $matches);
 		$status = (int)trim($matches[1]);
 		return $status;
 	}
@@ -619,36 +628,11 @@ class Resty
 			$this->callbacks['onRequestLog']($this->last_request);
 		}
 
-		$context = stream_context_create($opts);
 
-		$this->log("Sending…");
+		$resp_data = $this->makeStreamRequest($url, $opts);
 
-		if ($this->debug) { $start_time = microtime(true); }
-
-		$this->log("Opening stream…");
-		$stream = fopen($url, 'r', false, $context);
-		if (!$stream) {
-			$this->log("Stream open failed.");
-			throw new Exception("Stream open failed");
-		}
-
-		$this->log("Getting metadata…");
-		$resp['meta'] = stream_get_meta_data($stream);
-
-		$this->log("Getting response…");
-
-		$resp['body'] = stream_get_contents($stream);
-
-		$this->log("Closing stream…");
-		fclose($stream);
-
-		if ($this->debug) {
-			$stop_time = microtime(true);
-			$req_time = $stop_time - $start_time;
-			$this->log(sprintf("Request time for \"%s %s\": %f", $method, $url, $req_time));
-		}
-
-
+		$resp['meta'] = $resp_data['meta'];
+		$resp['body'] = $resp_data['body'];
 		$resp['status'] = $this->getStatusCode($resp['meta']);
 		$resp['headers'] = $this->metaToHeaders($resp['meta']);
 		$this->log($resp);
@@ -665,6 +649,53 @@ class Resty
 		}
 
 		return $resp;
+	}
+
+
+	/**
+	 * opens an http stream, sends the request, and returns result
+	 * @param  [type] $url  [description]
+	 * @param  [type] $opts [description]
+	 * @return [type]       [description]
+	 */
+	protected function makeStreamRequest($url, $opts) {
+
+		$resp_data = array();
+
+		$context = stream_context_create($opts);
+
+		$this->log("Sending…");
+		if ($this->debug) { $start_time = microtime(true); }
+
+		$this->log("Opening stream…");
+		if ($this->silence_fopen_warning) {
+			$stream = @fopen($url, 'r', false, $context);
+		} else {
+			$stream = fopen($url, 'r', false, $context);
+		}
+
+		if (!$stream) {
+			$this->log("Stream open failed.");
+			throw new Exception("Stream open failed");
+		}
+
+		$this->log("Getting metadata…");
+		$resp_data['meta'] = stream_get_meta_data($stream);
+
+		$this->log("Getting response…");
+		$resp_data['body'] = stream_get_contents($stream);
+
+		$this->log("Closing stream…");
+		fclose($stream);
+
+		if ($this->debug) {
+			$stop_time = microtime(true);
+			$req_time = $stop_time - $start_time;
+			$this->log(sprintf("Request time for \"%s %s\": %f", $method, $url, $req_time));
+		}
+
+		return $resp_data;
+
 	}
 
 
@@ -705,6 +736,46 @@ class Resty
 		return $resp;
 
 	}
+
+
+	protected function log($msg) {
+		if (!$this->debug) { return; }
+
+		if (is_callable($this->logger)) {
+			$logger = $this->logger;
+			return $logger($msg);
+		}
+
+		return $this->default_logger($msg);
+	}
+
+
+	/**
+	 * logging helper
+	 *
+	 * @param mixed $msg
+	 */
+	protected function default_logger($msg) {
+
+		$line = date(\DateTime::RFC822) . " :: ";
+
+		if (is_string($msg)) {
+			$line .= "{$msg}\n";
+		} else {
+			ob_start();
+			var_dump($msg);
+			$line = ob_get_clean();
+			$line .= "\n";
+		}
+
+		if (PHP_SAPI !== 'cli') {
+			$line = "<pre>$line</pre>\n";
+		}
+
+		return error_log($line);
+	}
+
+
 
 }
 
