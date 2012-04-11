@@ -10,7 +10,7 @@ require __DIR__."/Resty.php";
 
 $resty = new Resty();
 $resty->debug(true);
-$resty->setBaseURL('https://gimmebar.com/api/v0/');
+$resty->setBaseURL('https://gimmebar.com/api/v1/');
 $resp = $resty->get('public/assets/funkatron');
 print_r($resp);
 ```

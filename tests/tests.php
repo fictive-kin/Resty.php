@@ -23,10 +23,22 @@ fu::test('quacks like a duck', function() {
 });
 
 
+fu::test('Silence fopen test', function() {
+
+	$r = fu::fixture('resty');
+	try {
+		$r->get('http://fai9rp9whqrp9b8hqp98bhpwohropsrihbpohtpowhi/');
+	} catch(Exception $e) {
+		fu::equal('Stream open failed', $e->getMessage(), "Exception thrown and has correct message");
+	}
+
+});
+
+
 fu::test('gimme bar requests and responses', function() {
 
 	$r = fu::fixture('resty');
-	$r->setBaseURL('https://gimmebar.com/api/v0/');
+	$r->setBaseURL('https://gimmebar.com/api/v1/');
 	$resp = $r->get('public/assets/funkatron');
 	$req  = $r->getLastRequest();
 
@@ -38,7 +50,7 @@ fu::test('gimme bar requests and responses', function() {
 
 	fu::equal(
 		$req['url'],
-		'https://gimmebar.com/api/v0/public/assets/funkatron',
+		'https://gimmebar.com/api/v1/public/assets/funkatron',
 		"URL was correct"
 	);
 
