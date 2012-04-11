@@ -9,7 +9,7 @@ class Resty
 	/**
 	 * The version of this lib
 	 */
-	const VERSION = '0.3.5';
+	const VERSION = '0.3.6';
 
 	const DEFAULT_TIMEOUT = 240;
 
@@ -691,7 +691,7 @@ class Resty
 		if ($this->debug) {
 			$stop_time = microtime(true);
 			$req_time = $stop_time - $start_time;
-			$this->log(sprintf("Request time for \"%s %s\": %f", $method, $url, $req_time));
+			$this->log(sprintf("Request time for \"%s %s\": %f", $opts['http']['method'], $url, $req_time));
 		}
 
 		return $resp_data;
