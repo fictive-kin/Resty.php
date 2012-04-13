@@ -29,7 +29,7 @@ fu::test('Silence fopen test', function() {
 	try {
 		$r->get('http://fai9rp9whqrp9b8hqp98bhpwohropsrihbpohtpowhi/');
 	} catch(Exception $e) {
-		fu::equal('Stream open failed', $e->getMessage(), "Exception thrown and has correct message");
+		fu::ok(is_string($e->getMessage()), "Exception thrown");
 	}
 
 });

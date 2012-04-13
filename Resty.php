@@ -665,7 +665,7 @@ class Resty
 		$context = stream_context_create($opts);
 
 		$this->log("Sending…");
-		if ($this->debug) { $start_time = microtime(true); }
+		$start_time = microtime(true);
 
 		$this->log("Opening stream…");
 		if ($this->silence_fopen_warning) {
@@ -675,8 +675,11 @@ class Resty
 		}
 
 		if (!$stream) {
-			$this->log("Stream open failed.");
-			throw new Exception("Stream open failed");
+			$req_time = static::calc_time_passed($start_time);
+			$opts_json = !empty($opts) ? json_encode($opts) : 'null';
+			$msg = "Stream open failed for '{$url}'; req_time: {$req_time}; opts: {$opts_json}";
+			$this->log($msg);
+			throw new Exception($msg);
 		}
 
 		$this->log("Getting metadata…");
@@ -689,8 +692,7 @@ class Resty
 		fclose($stream);
 
 		if ($this->debug) {
-			$stop_time = microtime(true);
-			$req_time = $stop_time - $start_time;
+			$req_time = static::calc_time_passed($start_time);
 			$this->log(sprintf("Request time for \"%s %s\": %f", $opts['http']['method'], $url, $req_time));
 		}
 
@@ -735,6 +737,17 @@ class Resty
 
 		return $resp;
 
+	}
+
+	/**
+	 * calculate time passed in microtime
+	 * @param  float $start_time should be result of microtime(true)
+	 * @return float the diff between passed microtime and current microtime
+	 */
+	protected static function calc_time_passed($start_time) {
+		$stop_time = microtime(true);
+		$req_time = $stop_time - $start_time;
+		return $req_time;
 	}
 
 
