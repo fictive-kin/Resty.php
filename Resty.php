@@ -9,7 +9,7 @@ class Resty
 	/**
 	 * The version of this lib
 	 */
-	const VERSION = '0.3.6';
+	const VERSION = '0.3.7';
 
 	const DEFAULT_TIMEOUT = 240;
 
@@ -712,7 +712,9 @@ class Resty
 	protected function processResponseBody($resp) {
 
 		if ($this->parse_body === true) {
-			$content_type = preg_split('/[;\s]+/', $resp['headers']['Content-Type']);
+
+			$header_content_type = isset($resp['headers']['Content-Type']) ? $resp['headers']['Content-Type'] : null;
+			$content_type = preg_split('/[;\s]+/', $header_content_type);
 			$content_type = $content_type[0];
 
 			if (in_array($content_type, static::$JSON_TYPES)) {
