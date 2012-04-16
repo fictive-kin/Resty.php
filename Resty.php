@@ -9,7 +9,7 @@ class Resty
 	/**
 	 * The version of this lib
 	 */
-	const VERSION = '0.3.7';
+	const VERSION = '0.3.8';
 
 	const DEFAULT_TIMEOUT = 240;
 
@@ -76,6 +76,13 @@ class Resty
 	protected $silence_fopen_warning = true;
 
 	/**
+	 * by default, don't raise an exception if fopen() fails
+	 * @var boolean
+	 */
+	protected $raise_fopen_exception = false;
+
+
+	/**
 	 * content-types that will trigger JSON parsing of body
 	 * @var array
 	 */
@@ -117,8 +124,11 @@ class Resty
 		if (!empty($opts['onResponseLog']) && ($opts['onResponseLog'] instanceof Closure)) {
 			$this->callbacks['onResponseLog'] = $opts['onResponseLog'];
 		}
-		if (!empty($opts['silence_fopen_warning']) && ($opts['silence_fopen_warning'] instanceof Closure)) {
-			$this->silenceFopenWarning($opts['silence_fopen_warning']);
+		if (isset($opts['silence_fopen_warning'])) {
+			$this->silenceFopenWarning((bool)$opts['silence_fopen_warning']);
+		}
+		if (isset($opts['raise_fopen_exception'])) {
+			$this->raiseFopenException((bool)$opts['raise_fopen_exception']);
 		}
 	}
 
@@ -406,6 +416,18 @@ class Resty
 	}
 
 	/**
+	 * raise an exception from fopen if trying to open stream fails
+	 * @param  boolean $state=null optional, set the state
+	 * @return boolean the current state
+	 */
+	public function raiseFopenException($state=null) {
+		if (isset($state)) {
+			$this->raise_fopen_exception = (bool)$state;
+		}
+		return $this->raise_fopen_exception;
+	}
+
+	/**
 	 * silence warnings from fopen when trying to open stream
 	 * @param  boolean $state=null optional, set the state
 	 * @return boolean the current state
@@ -509,10 +531,17 @@ class Resty
 	 */
 	protected function metaToHeaders($meta) {
 		$headers = array();
+
+		if (!isset($meta['wrapper_data'])) {
+			return $headers;
+		}
+
 		foreach ($meta['wrapper_data'] as $value) {
 			if (strpos($value, 'HTTP') !== 0) {
 				preg_match("|^([^:]+):\s?(.+)$|", $value, $matches);
-				$headers[trim($matches[1])] = trim($matches[2], " \t\n\r\0\x0B\"");
+				if (is_array($matches) && isset($matches[2])) {
+					$headers[trim($matches[1])] = trim($matches[2], " \t\n\r\0\x0B\"");
+				}
 			}
 		}
 		return $headers;
@@ -525,8 +554,11 @@ class Resty
 	 */
 	protected function getStatusCode($meta) {
 		$matches = array();
+		$status = 0;
 		preg_match("|\s(\d\d\d)\s?|", $meta['wrapper_data'][0], $matches);
-		$status = (int)trim($matches[1]);
+		if (is_array($matches) && isset($matches[1])) {
+			$status = (int)trim($matches[1]);
+		}
 		return $status;
 	}
 
@@ -633,6 +665,8 @@ class Resty
 
 		$resp['meta'] = $resp_data['meta'];
 		$resp['body'] = $resp_data['body'];
+		$resp['error'] = $resp_data['error'];
+		$resp['error_msg'] = $resp_data['error_msg'];
 		$resp['status'] = $this->getStatusCode($resp['meta']);
 		$resp['headers'] = $this->metaToHeaders($resp['meta']);
 		$this->log($resp);
@@ -660,7 +694,12 @@ class Resty
 	 */
 	protected function makeStreamRequest($url, $opts) {
 
-		$resp_data = array();
+		$resp_data = array(
+			'meta' => null,
+			'body' => null,
+			'error' => true,
+			'error_msg' => null,
+		);
 
 		$context = stream_context_create($opts);
 
@@ -675,21 +714,32 @@ class Resty
 		}
 
 		if (!$stream) {
+
 			$req_time = static::calc_time_passed($start_time);
 			$opts_json = !empty($opts) ? json_encode($opts) : 'null';
 			$msg = "Stream open failed for '{$url}'; req_time: {$req_time}; opts: {$opts_json}";
 			$this->log($msg);
-			throw new Exception($msg);
+
+			if ($this->raise_fopen_exception) {
+				throw new Exception($msg);
+			} else {
+				$resp_data['error'] = true;
+				$resp_data['error_msg'] = $msg;
+			}
+
+		} else {
+
+			$this->log("Getting metadata…");
+			$resp_data['meta'] = stream_get_meta_data($stream);
+
+			$this->log("Getting response…");
+			$resp_data['body'] = stream_get_contents($stream);
+
+			$this->log("Closing stream…");
+			fclose($stream);
+
 		}
 
-		$this->log("Getting metadata…");
-		$resp_data['meta'] = stream_get_meta_data($stream);
-
-		$this->log("Getting response…");
-		$resp_data['body'] = stream_get_contents($stream);
-
-		$this->log("Closing stream…");
-		fclose($stream);
 
 		if ($this->debug) {
 			$req_time = static::calc_time_passed($start_time);
