@@ -9,10 +9,10 @@ class Resty
 	/**
 	 * The version of this lib
 	 */
-	const VERSION = '0.3.8';
+	const VERSION = '0.4.0';
 
 	const DEFAULT_TIMEOUT = 240;
-	
+
 	const DEFAULT_MAX_REDIRECTS = 0;
 
 	/**
@@ -88,8 +88,8 @@ class Resty
 	 * @var boolean
 	 */
 	protected $supports_patch = false;
-	
-	
+
+
 	/**
 	 * content-types that will trigger JSON parsing of body
 	 * @var array
@@ -183,7 +183,7 @@ class Resty
 
 	/**
 	 * get a specific link (via the rel tag) from the last response
-	 * 
+	 *
 	 * @param string $rel
 	 * @return stdClass with a link and type.
 	 */
@@ -203,11 +203,11 @@ class Resty
 				}
 			}
 		}
-	
+
 		return $linkObj;
-	
+
 	}
-	
+
 	/**
 	 * make a GET request
 	 *
@@ -263,7 +263,7 @@ class Resty
 	public function patch($url, $querydata=null, $headers=null, $options=null) {
 		return $this->sendRequest($url, 'PATCH', $querydata, $headers, $options);
 	}
-	
+
 	/**
 	 * make a DELETE request
 	 *
@@ -493,7 +493,7 @@ class Resty
 		}
 		return $this->silence_fopen_warning;
 	}
-	
+
 	/**
 	 * configure whether or not the REST endpoint supports the HTTP PATCH method. If set
 	 * to false, the X-HTTP-Method-Override header will be sent using HTTP POST.
@@ -506,7 +506,7 @@ class Resty
 		}
 		return $this->supports_patch;
 	}
-	
+
 
 	/**
 	 * sets an alternate logging method
@@ -613,7 +613,7 @@ class Resty
 					$header_value = trim($matches[2], " \t\n\r\0\x0B\"");
 					if (isset($headers[$header_key])) {
 						if (is_array($headers[$header_key])) {
-							$headers[$header_key][] = $header_value; 
+							$headers[$header_key][] = $header_value;
 						} else {
 							$previous_entry = $headers[$header_key];
 							$headers[$header_key] = array($previous_entry, $header_value);
@@ -675,7 +675,7 @@ class Resty
 			$this->log("{$this->username}:{$this->password}");
 			$headers['Authorization'] = 'Basic '.base64_encode("{$this->username}:{$this->password}");
 		}
-		
+
 		// if PATCH isn't supported, include it as header option.
 		if ($method == 'PATCH' && !$this->supports_patch) {
 			$headers['X-HTTP-Method-Override'] = $method;
@@ -687,7 +687,7 @@ class Resty
 
 		// default max_redirects
 		$max_redirects = isset($options['max_redirects']) ? $options['max_redirects'] : static::DEFAULT_MAX_REDIRECTS;
-		
+
 		$content = null;
 
 		// if querydata is a string, just pass it as-is
@@ -818,7 +818,7 @@ class Resty
 			}
 
 		} else {
-			
+
 			$this->log("Getting metadata...");
 			$resp_data['meta'] = stream_get_meta_data($stream);
 
