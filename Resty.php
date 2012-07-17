@@ -12,6 +12,8 @@ class Resty
 	const VERSION = '0.3.8';
 
 	const DEFAULT_TIMEOUT = 240;
+	
+	const DEFAULT_MAX_REDIRECTS = 0;
 
 	/**
 	 * @var bool enables debugging output
@@ -81,7 +83,13 @@ class Resty
 	 */
 	protected $raise_fopen_exception = false;
 
-
+	/**
+	 * by default, send X-HTTP-Method-Override header for PATCH requests.
+	 * @var boolean
+	 */
+	protected $supports_patch = false;
+	
+	
 	/**
 	 * content-types that will trigger JSON parsing of body
 	 * @var array
@@ -111,6 +119,9 @@ class Resty
 	 * Passed opts can include
 	 * $opts['onRequestLog'] - an anonymous function that takes the Resty::last_request property as arg
 	 * $opts['onResponseLog'] - an anonymous function that takes the Resty::last_response property as arg
+	 * $opts['silence_fopen_warning'] - boolean: silence warnings from fopen when trying to open stream
+	 * $opts['raise_fopen_exception'] - boolean: raise an exception from fopen if trying to open stream fails
+	 * $opts['supports_patch'] - boolean: set to true if the REST end point you're connecting to supports PATCH. False will use the X-HTTP-Method-Override header.
 	 *
 	 * @see Resty::last_request
 	 * @see Resty::last_response
@@ -129,6 +140,9 @@ class Resty
 		}
 		if (isset($opts['raise_fopen_exception'])) {
 			$this->raiseFopenException((bool)$opts['raise_fopen_exception']);
+		}
+		if (isset($opts['supports_patch'])) {
+			$this->supportsPatch((bool)$opts['supports_patch']);
 		}
 	}
 
@@ -167,6 +181,33 @@ class Resty
 
 	}
 
+	/**
+	 * get a specific link (via the rel tag) from the last response
+	 * 
+	 * @param string $rel
+	 * @return stdClass with a link and type.
+	 */
+	public function getLink($rel) {
+		$linkObj = new stdClass();
+		$linkObj->link = '';
+		$linkObj->type = '';
+		if (isset($this->last_response['headers']['link'])) {
+			$links = is_array($this->last_response['headers']['link']) ? $this->last_response['headers']['link'] : array($this->last_response['headers']['link']);
+			foreach($links as $link) {
+				$matches = array();
+				if (preg_match('/(<)(.*)(>;rel="(.*)";)(.*)(;type=")(.*)/', $link, $matches)) {
+    				if ($rel == $matches[4]) {
+    				    $linkObj->link = $matches[2];
+    				    $linkObj->type = $matches[7];
+    				}
+				}
+			}
+		}
+	
+		return $linkObj;
+	
+	}
+	
 	/**
 	 * make a GET request
 	 *
@@ -209,6 +250,20 @@ class Resty
 		return $this->sendRequest($url, 'PUT', $querydata, $headers, $options);
 	}
 
+	/**
+	 * make a PATCH request
+	 *
+	 * @param string the URL. This will be appended to the base_url, if any set
+	 * @param array $querydata hash of key/val pairs
+	 * @param array $headers hash of key/val pairs
+	 * @param array $options hash of key/val pairs ('timeout')
+	 * @return array the response hash
+	 * @see Resty::sendRequest()
+	 */
+	public function patch($url, $querydata=null, $headers=null, $options=null) {
+		return $this->sendRequest($url, 'PATCH', $querydata, $headers, $options);
+	}
+	
 	/**
 	 * make a DELETE request
 	 *
@@ -438,6 +493,20 @@ class Resty
 		}
 		return $this->silence_fopen_warning;
 	}
+	
+	/**
+	 * configure whether or not the REST endpoint supports the HTTP PATCH method. If set
+	 * to false, the X-HTTP-Method-Override header will be sent using HTTP POST.
+	 * @param  boolean $state=null optional, set the state
+	 * @return boolean the current state
+	 */
+	public function supportsPatch($state=null) {
+		if (isset($state)) {
+			$this->supports_patch = (bool)$state;
+		}
+		return $this->supports_patch;
+	}
+	
 
 	/**
 	 * sets an alternate logging method
@@ -540,7 +609,18 @@ class Resty
 			if (strpos($value, 'HTTP') !== 0) {
 				preg_match("|^([^:]+):\s?(.+)$|", $value, $matches);
 				if (is_array($matches) && isset($matches[2])) {
-					$headers[trim($matches[1])] = trim($matches[2], " \t\n\r\0\x0B\"");
+					$header_key = trim($matches[1]);
+					$header_value = trim($matches[2], " \t\n\r\0\x0B\"");
+					if (isset($headers[$header_key])) {
+						if (is_array($headers[$header_key])) {
+							$headers[$header_key][] = $header_value; 
+						} else {
+							$previous_entry = $headers[$header_key];
+							$headers[$header_key] = array($previous_entry, $header_value);
+						}
+					} else {
+						$headers[$header_key] = $header_value;
+					}
 				}
 			}
 		}
@@ -595,10 +675,19 @@ class Resty
 			$this->log("{$this->username}:{$this->password}");
 			$headers['Authorization'] = 'Basic '.base64_encode("{$this->username}:{$this->password}");
 		}
+		
+		// if PATCH isn't supported, include it as header option.
+		if ($method == 'PATCH' && !$this->supports_patch) {
+			$headers['X-HTTP-Method-Override'] = $method;
+			$method = 'POST';
+		}
 
 		// default timeout
 		$timeout = isset($options['timeout']) ? $options['timeout'] : static::DEFAULT_TIMEOUT;
 
+		// default max_redirects
+		$max_redirects = isset($options['max_redirects']) ? $options['max_redirects'] : static::DEFAULT_MAX_REDIRECTS;
+		
 		$content = null;
 
 		// if querydata is a string, just pass it as-is
@@ -632,7 +721,8 @@ class Resty
 				'content'=> (!$urlcontent) ? $content : null,
 				'user_agent'=>$this->getUserAgent(),
 				'header'=>$headerarr,
-				'ignore_errors'=>1
+				'ignore_errors'=>1,
+				'max_redirects'=>$max_redirects
 			)
 		);
 
@@ -671,7 +761,7 @@ class Resty
 		$resp['headers'] = $this->metaToHeaders($resp['meta']);
 		$this->log($resp);
 
-		$this->log("Processing response body…");
+		$this->log("Processing response body...");
 		$resp = $this->processResponseBody($resp);
 		$this->log($resp['body']);
 
@@ -703,10 +793,10 @@ class Resty
 
 		$context = stream_context_create($opts);
 
-		$this->log("Sending…");
+		$this->log("Sending...");
 		$start_time = microtime(true);
 
-		$this->log("Opening stream…");
+		$this->log("Opening stream...");
 		if ($this->silence_fopen_warning) {
 			$stream = @fopen($url, 'r', false, $context);
 		} else {
@@ -728,14 +818,14 @@ class Resty
 			}
 
 		} else {
-
-			$this->log("Getting metadata…");
+			
+			$this->log("Getting metadata...");
 			$resp_data['meta'] = stream_get_meta_data($stream);
 
-			$this->log("Getting response…");
+			$this->log("Getting response...");
 			$resp_data['body'] = stream_get_contents($stream);
 
-			$this->log("Closing stream…");
+			$this->log("Closing stream...");
 			fclose($stream);
 
 		}
@@ -767,14 +857,14 @@ class Resty
 			$content_type = preg_split('/[;\s]+/', $header_content_type);
 			$content_type = $content_type[0];
 
-			if (in_array($content_type, static::$JSON_TYPES)) {
+			if (in_array($content_type, static::$JSON_TYPES) || strpos($content_type,'+json') !== false) {
 
 				$this->log("Response body is JSON");
 				$resp['body_raw'] = $resp['body'];
 				$resp['body'] = json_decode($resp['body']);
 				return $resp;
 
-			} elseif (in_array($content_type, static::$XML_TYPES)) {
+			} elseif (in_array($content_type, static::$XML_TYPES) || strpos($content_type,'+xml') !== false) {
 
 				$this->log("Response body is XML");
 				$resp['body_raw'] = $resp['body'];
