@@ -195,11 +195,9 @@ class Resty
 			$links = is_array($this->last_response['headers']['link']) ? $this->last_response['headers']['link'] : array($this->last_response['headers']['link']);
 			foreach($links as $link) {
 				$matches = array();
-				if (preg_match('/(<)(.*)(>;rel="(.*)";)(.*)(;type=")(.*)/', $link, $matches)) {
-    				if ($rel == $matches[4]) {
-    				    $linkObj->link = $matches[2];
-    				    $linkObj->type = $matches[7];
-    				}
+				if (preg_match('/(<)(.*)(>;rel="' . $rel . '";)(.*)(;type=")(.*)/', $link, $matches)) {
+					$linkObj->link = $matches[2];
+					$linkObj->type = $matches[6];
 				}
 			}
 		}
