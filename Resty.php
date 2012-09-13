@@ -634,8 +634,20 @@ class Resty
 	 */
 	protected function getStatusCode($meta) {
 		$matches = array();
+
+		// We need last http status
+		$statusHeader = NULL;
+		foreach(array_reverse($meta['wrapper_data']) as $header)
+		{
+			if (strpos($header, 'HTTP') === 0)
+			{
+				$statusHeader = $header;
+				break;
+			}
+		}
+
 		$status = 0;
-		preg_match("|\s(\d\d\d)\s?|", $meta['wrapper_data'][0], $matches);
+		preg_match("|\s(\d\d\d)\s?|", $statusHeader, $matches);
 		if (is_array($matches) && isset($matches[1])) {
 			$status = (int)trim($matches[1]);
 		}
@@ -854,6 +866,13 @@ class Resty
 		if ($this->parse_body === true) {
 
 			$header_content_type = isset($resp['headers']['Content-Type']) ? $resp['headers']['Content-Type'] : null;
+
+			// If redirected, we use last Content-Type
+			if (is_array($header_content_type))
+			{
+				$header_content_type = end($header_content_type);
+			}
+
 			$content_type = preg_split('/[;\s]+/', $header_content_type);
 			$content_type = $content_type[0];
 
