@@ -790,9 +790,10 @@ class Resty
 
 	/**
 	 * opens an http stream, sends the request, and returns result
-	 * @param  [type] $url  [description]
-	 * @param  [type] $opts [description]
-	 * @return [type]       [description]
+	 * @param  string $url
+	 * @param  array  $opts
+ 	 * @throws Exception If opening stream fails.
+	 * @return array
 	 */
 	protected function makeStreamRequest($url, $opts) {
 
