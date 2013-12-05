@@ -282,7 +282,7 @@ class Resty
 	 * @param  array  $params
 	 * @param  array  $headers
 	 * @param  array  $options
- 	 * @return array
+	 * @return array
 	 *
 	 * The $files array should be a set of key/val pairs, with the key being
 	 * the field name, and the val the file path. ex:
@@ -332,7 +332,7 @@ class Resty
 	 * @param  array  $params
 	 * @param  array  $headers
 	 * @param  array  $options
-  	 * @return array
+	 * @return array
 	 *
 	 * The $binary_data array should be a set of key/val pairs, with the key being
 	 * the field name, and the val the binary data. ex:
@@ -454,7 +454,7 @@ class Resty
 	 * bc wrapper
 	 * @param bool $state
 	 */
- 	public function enableDebugging($state=false) {
+	public function enableDebugging($state=false) {
 		$this->debug($state);
 	}
 
