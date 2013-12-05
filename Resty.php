@@ -212,7 +212,7 @@ class Resty
 	 * make a GET request
 	 *
 	 * @param string the URL. This will be appended to the base_url, if any set
-	 * @param array $querydata hash of key/val pairs
+	 * @param array|string $querydata hash of key/val pairs
 	 * @param array $headers hash of key/val pairs
 	 * @param array $options hash of key/val pairs ('timeout')
 	 * @return array the response hash
@@ -226,7 +226,7 @@ class Resty
 	 * make a POST request
 	 *
 	 * @param string the URL. This will be appended to the base_url, if any set
-	 * @param array $querydata hash of key/val pairs
+	 * @param array|string $querydata hash of key/val pairs
 	 * @param array $headers hash of key/val pairs
 	 * @param array $options hash of key/val pairs ('timeout')
 	 * @return array the response hash
@@ -240,7 +240,7 @@ class Resty
 	 * make a PUT request
 	 *
 	 * @param string the URL. This will be appended to the base_url, if any set
-	 * @param array $querydata hash of key/val pairs
+	 * @param array|string $querydata hash of key/val pairs
 	 * @param array $headers hash of key/val pairs
 	 * @param array $options hash of key/val pairs ('timeout')
 	 * @return array the response hash
@@ -254,7 +254,7 @@ class Resty
 	 * make a PATCH request
 	 *
 	 * @param string the URL. This will be appended to the base_url, if any set
-	 * @param array $querydata hash of key/val pairs
+	 * @param array|string $querydata hash of key/val pairs
 	 * @param array $headers hash of key/val pairs
 	 * @param array $options hash of key/val pairs ('timeout')
 	 * @return array the response hash
@@ -268,7 +268,7 @@ class Resty
 	 * make a DELETE request
 	 *
 	 * @param string the URL. This will be appended to the base_url, if any set
-	 * @param array $querydata hash of key/val pairs
+	 * @param array|string $querydata hash of key/val pairs
 	 * @param array $headers hash of key/val pairs
 	 * @param array $options hash of key/val pairs ('timeout')
 	 * @return array the response hash
@@ -659,7 +659,7 @@ class Resty
 	 *
 	 * @param string $url
 	 * @param string $method
-	 * @param array $querydata OPTIONAL
+	 * @param array|string $querydata OPTIONAL
 	 * @param array $headers OPTIONAL
 	 * @param array $options OPTIONAL
 	 * @return array
