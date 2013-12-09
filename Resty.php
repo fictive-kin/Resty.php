@@ -74,6 +74,7 @@ class Resty
 
 	/**
 	 * by default, silence the fopen warning if we can't open the stream
+	 * @var boolean
 	 */
 	protected $silence_fopen_warning = true;
 
@@ -88,7 +89,6 @@ class Resty
 	 * @var boolean
 	 */
 	protected $supports_patch = false;
-
 
 	/**
 	 * content-types that will trigger JSON parsing of body
@@ -114,7 +114,6 @@ class Resty
 		'application/mathml+xml',
 	);
 
-
 	/**
 	 * Passed opts can include
 	 * $opts['onRequestLog'] - an anonymous function that takes the Resty::last_request property as arg
@@ -123,9 +122,9 @@ class Resty
 	 * $opts['raise_fopen_exception'] - boolean: raise an exception from fopen if trying to open stream fails
 	 * $opts['supports_patch'] - boolean: set to true if the REST end point you're connecting to supports PATCH. False will use the X-HTTP-Method-Override header.
 	 *
-	 * @see Resty::last_request
-	 * @see Resty::last_response
-	 * @see Resty::sendRequest()
+	 * @see   Resty::last_request
+	 * @see   Resty::last_response
+	 * @see   Resty::sendRequest()
 	 * @param array $opts OPTIONAL array of options
 	 */
 	function __construct($opts=null) {
@@ -146,13 +145,12 @@ class Resty
 		}
 	}
 
-
 	/**
 	 * retrieve the last request we sent
 	 *
 	 * valid keys are ['url', 'method', 'querydata', 'headers', 'options', 'opts']
 	 *
-	 * @param string $key just retrieve a given field from the hash
+	 * @param  string $key just retrieve a given field from the hash
 	 * @return mixed
 	 */
 	public function getLastRequest($key=null) {
@@ -169,7 +167,7 @@ class Resty
 	 *
 	 * valid keys are ['meta', 'status', 'headers', 'body']
 	 *
-	 * @param string $key just retrieve a given field from the hash
+	 * @param  string $key just retrieve a given field from the hash
 	 * @return mixed
 	 */
 	public function getLastResponse($key=null) {
@@ -184,7 +182,7 @@ class Resty
 	/**
 	 * get a specific link (via the rel tag) from the last response
 	 *
-	 * @param string $rel
+	 * @param  string $rel
 	 * @return stdClass with a link and type.
 	 */
 	public function getLink($rel) {
@@ -211,12 +209,12 @@ class Resty
 	/**
 	 * make a GET request
 	 *
-	 * @param string the URL. This will be appended to the base_url, if any set
-	 * @param array $querydata hash of key/val pairs
-	 * @param array $headers hash of key/val pairs
-	 * @param array $options hash of key/val pairs ('timeout')
-	 * @return array the response hash
-	 * @see Resty::sendRequest()
+	 * @param  string       $url the URL. This will be appended to the base_url, if any set
+	 * @param  array|string $querydata hash of key/val pairs
+	 * @param  array        $headers hash of key/val pairs
+	 * @param  array        $options hash of key/val pairs ('timeout')
+	 * @return array        the response hash
+	 * @see    Resty::sendRequest()
 	 */
 	public function get($url, $querydata=null, $headers=null, $options=null) {
 		return $this->sendRequest($url, 'GET', $querydata, $headers, $options);
@@ -225,12 +223,12 @@ class Resty
 	/**
 	 * make a POST request
 	 *
-	 * @param string the URL. This will be appended to the base_url, if any set
-	 * @param array $querydata hash of key/val pairs
-	 * @param array $headers hash of key/val pairs
-	 * @param array $options hash of key/val pairs ('timeout')
-	 * @return array the response hash
-	 * @see Resty::sendRequest()
+	 * @param  string       $url the URL. This will be appended to the base_url, if any set
+	 * @param  array|string $querydata hash of key/val pairs
+	 * @param  array        $headers hash of key/val pairs
+	 * @param  array        $options hash of key/val pairs ('timeout')
+	 * @return array        the response hash
+	 * @see    Resty::sendRequest()
 	 */
 	public function post($url, $querydata=null, $headers=null, $options=null) {
 		return $this->sendRequest($url, 'POST', $querydata, $headers, $options);
@@ -239,12 +237,12 @@ class Resty
 	/**
 	 * make a PUT request
 	 *
-	 * @param string the URL. This will be appended to the base_url, if any set
-	 * @param array $querydata hash of key/val pairs
-	 * @param array $headers hash of key/val pairs
-	 * @param array $options hash of key/val pairs ('timeout')
-	 * @return array the response hash
-	 * @see Resty::sendRequest()
+	 * @param  string       $url the URL. This will be appended to the base_url, if any set
+	 * @param  array|string $querydata hash of key/val pairs
+	 * @param  array        $headers hash of key/val pairs
+	 * @param  array        $options hash of key/val pairs ('timeout')
+	 * @return array        the response hash
+	 * @see    Resty::sendRequest()
 	 */
 	public function put($url, $querydata=null, $headers=null, $options=null) {
 		return $this->sendRequest($url, 'PUT', $querydata, $headers, $options);
@@ -253,12 +251,12 @@ class Resty
 	/**
 	 * make a PATCH request
 	 *
-	 * @param string the URL. This will be appended to the base_url, if any set
-	 * @param array $querydata hash of key/val pairs
-	 * @param array $headers hash of key/val pairs
-	 * @param array $options hash of key/val pairs ('timeout')
-	 * @return array the response hash
-	 * @see Resty::sendRequest()
+	 * @param  string       $url the URL. This will be appended to the base_url, if any set
+	 * @param  array|string $querydata hash of key/val pairs
+	 * @param  array        $headers hash of key/val pairs
+	 * @param  array        $options hash of key/val pairs ('timeout')
+	 * @return array        the response hash
+	 * @see    Resty::sendRequest()
 	 */
 	public function patch($url, $querydata=null, $headers=null, $options=null) {
 		return $this->sendRequest($url, 'PATCH', $querydata, $headers, $options);
@@ -267,23 +265,24 @@ class Resty
 	/**
 	 * make a DELETE request
 	 *
-	 * @param string the URL. This will be appended to the base_url, if any set
-	 * @param array $querydata hash of key/val pairs
-	 * @param array $headers hash of key/val pairs
-	 * @param array $options hash of key/val pairs ('timeout')
-	 * @return array the response hash
-	 * @see Resty::sendRequest()
+	 * @param  string       $url the URL. This will be appended to the base_url, if any set
+	 * @param  array|string $querydata hash of key/val pairs
+	 * @param  array        $headers hash of key/val pairs
+	 * @param  array        $options hash of key/val pairs ('timeout')
+	 * @return array        the response hash
+	 * @see    Resty::sendRequest()
 	 */
 	public function delete($url, $querydata=null, $headers=null, $options=null) {
 		return $this->sendRequest($url, 'DELETE', $querydata, $headers, $options);
 	}
 
 	/**
-	 * @param string $url
-	 * @param array  $files
-	 * @param array  $params
-	 * @param array  $headers
-	 * @param array  $options
+	 * @param  string $url
+	 * @param  array  $files
+	 * @param  array  $params
+	 * @param  array  $headers
+	 * @param  array  $options
+	 * @return array
 	 *
 	 * The $files array should be a set of key/val pairs, with the key being
 	 * the field name, and the val the file path. ex:
@@ -327,13 +326,13 @@ class Resty
 		return $this->post($url, $datastr, $headers, $options);
 	}
 
-
 	/**
-	 * @param string $url
-	 * @param array  $binary_data
-	 * @param array  $params
-	 * @param array  $headers
-	 * @param array  $options
+	 * @param  string $url
+	 * @param  array  $binary_data
+	 * @param  array  $params
+	 * @param  array  $headers
+	 * @param  array  $options
+	 * @return array
 	 *
 	 * The $binary_data array should be a set of key/val pairs, with the key being
 	 * the field name, and the val the binary data. ex:
@@ -453,6 +452,7 @@ class Resty
 
 	/**
 	 * bc wrapper
+	 * @param bool $state
 	 */
 	public function enableDebugging($state=false) {
 		$this->debug($state);
@@ -460,8 +460,8 @@ class Resty
 
 	/**
 	 * enable or disable debugging. If no arg passed, just returns current state
-	 * @param bool $state=null if not passed, state not changed
-	 * @return boolean the current state
+	 * @param  bool $state if not passed, state not changed
+	 * @return bool the current state
 	 */
 	public function debug($state=null) {
 		if (isset($state)) {
@@ -484,7 +484,7 @@ class Resty
 
 	/**
 	 * silence warnings from fopen when trying to open stream
-	 * @param  boolean $state=null optional, set the state
+	 * @param  boolean $state optional, set the state
 	 * @return boolean the current state
 	 */
 	public function silenceFopenWarning($state=null) {
@@ -506,7 +506,6 @@ class Resty
 		}
 		return $this->supports_patch;
 	}
-
 
 	/**
 	 * sets an alternate logging method
@@ -581,7 +580,7 @@ class Resty
 	/**
 	 * takes a set of key/val pairs and builds an array of raw header strings
 	 *
-	 * @param string $headers
+	 * @param  string $headers
 	 * @return void
 	 * @author Ed Finkler
 	 */
@@ -595,7 +594,7 @@ class Resty
 
 	/**
 	 * Extracts the headers of a response from the stream's meta data
-	 * @param array $meta
+	 * @param  array $meta
 	 * @return array
 	 */
 	protected function metaToHeaders($meta) {
@@ -629,7 +628,7 @@ class Resty
 
 	/**
 	 * extracts the status code from the stream meta data
-	 * @param array $meta
+	 * @param  array $meta
 	 * @return integer
 	 */
 	protected function getStatusCode($meta) {
@@ -657,11 +656,11 @@ class Resty
 	/**
 	 * Sends the HTTP request and retrieves/parses the response
 	 *
-	 * @param string $url
-	 * @param string $method
-	 * @param array $querydata OPTIONAL
-	 * @param array $headers OPTIONAL
-	 * @param array $options OPTIONAL
+	 * @param  string       $url
+	 * @param  string       $method
+	 * @param  array|string $querydata OPTIONAL
+	 * @param  array        $headers OPTIONAL
+	 * @param  array        $options OPTIONAL
 	 * @return array
 	 * @author Ed Finkler
 	 */
@@ -787,12 +786,12 @@ class Resty
 		return $resp;
 	}
 
-
 	/**
 	 * opens an http stream, sends the request, and returns result
-	 * @param  [type] $url  [description]
-	 * @param  [type] $opts [description]
-	 * @return [type]       [description]
+	 * @param  string $url
+	 * @param  array  $opts
+ 	 * @throws Exception If opening stream fails.
+	 * @return array
 	 */
 	protected function makeStreamRequest($url, $opts) {
 
@@ -852,14 +851,13 @@ class Resty
 
 	}
 
-
 	/**
 	 * If we get back something that claims to be XML or JSON, parse it as such and assign to $resp['body']
 	 *
-	 * @param string $resp
+	 * @param  string $resp
 	 * @return string|object
-	 * @see Resty::$JSON_TYPES
-	 * @see Resty::$XML_TYPES
+	 * @see    Resty::$JSON_TYPES
+	 * @see    Resty::$XML_TYPES
 	 */
 	protected function processResponseBody($resp) {
 
@@ -911,7 +909,10 @@ class Resty
 		return $req_time;
 	}
 
-
+	/**
+	 * @param  mixed $msg
+	 * @return array
+	 */
 	protected function log($msg) {
 		if (!$this->debug) { return; }
 
@@ -923,11 +924,11 @@ class Resty
 		return $this->default_logger($msg);
 	}
 
-
 	/**
 	 * logging helper
 	 *
-	 * @param mixed $msg
+	 * @param  mixed $msg
+ 	 * @return array
 	 */
 	protected function default_logger($msg) {
 
@@ -948,8 +949,6 @@ class Resty
 
 		return error_log($line);
 	}
-
-
 
 }
 
