@@ -855,7 +855,7 @@ class Resty
             $this->log($msg);
 
             if ($this->raise_fopen_exception) {
-                throw new Exception($msg);
+                throw new \Exception($msg);
             } else {
                 $resp_data['error'] = true;
                 $resp_data['error_msg'] = $msg;
