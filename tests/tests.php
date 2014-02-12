@@ -104,4 +104,22 @@ fu::test('gimme bar requests and responses', function () {
 
 });
 
+fu::test('httpin GET JSON decoding', function () {
+
+    $r = fu::fixture('resty');
+    $r->setBaseURL(HTTPBIN_URL);
+
+    $r->jsonToArray(false);
+    $resp = $r->get('get');
+    fu::ok(is_object($resp['body']), "decoded JSON is object");
+    fu::ok($resp['body'] instanceof \StdClass, 'Response body should be a StdClass');
+
+    $r->jsonToArray(true);
+    $resp = $r->get('get');
+    fu::ok(is_array($resp['body']), "decoded JSON is array");
+    $r->jsonToArray(false);
+
+});
+
+
 fu::run();

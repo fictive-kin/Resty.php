@@ -94,6 +94,13 @@ class Resty
     protected $supports_patch = false;
 
     /**
+     * by default, convert decoded JSON to an object of StdClass. If true,
+     * convert to an array.
+     * @var boolean
+     */
+    protected $json_to_array = false;
+
+    /**
      * content-types that will trigger JSON parsing of body
      * @var array
      */
@@ -124,6 +131,7 @@ class Resty
      * $opts['silence_fopen_warning'] - boolean: silence warnings from fopen when trying to open stream
      * $opts['raise_fopen_exception'] - boolean: raise an exception from fopen if trying to open stream fails
      * $opts['supports_patch'] - boolean: set to true if the REST end point you're connecting to supports PATCH. False will use the X-HTTP-Method-Override header.
+     * $opts['json_to_array'] - boolean: set to true if decoded JSON should be an array, not an object
      *
      * @see   Resty::last_request
      * @see   Resty::last_response
@@ -146,6 +154,9 @@ class Resty
         }
         if (isset($opts['supports_patch'])) {
             $this->supportsPatch((bool)$opts['supports_patch']);
+        }
+        if (isset($opts['json_to_array'])) {
+            $this->jsonToArray((bool)$opts['json_to_array']);
         }
     }
 
@@ -525,6 +536,20 @@ class Resty
             $this->supports_patch = (bool)$state;
         }
         return $this->supports_patch;
+    }
+
+    /**
+     * configure whether to decode JSON into an array or an object. By default,
+     * converts to object.
+     * @param  boolean $state = null optional, set the state
+     * @return boolean the current state
+     */
+    public function jsonToArray($state = null)
+    {
+        if (isset($state)) {
+            $this->json_to_array = (bool)$state;
+        }
+        return $this->json_to_array;
     }
 
     /**
@@ -911,7 +936,7 @@ class Resty
 
                 $this->log("Response body is JSON");
                 $resp['body_raw'] = $resp['body'];
-                $resp['body'] = json_decode($resp['body']);
+                $resp['body'] = json_decode($resp['body'], $this->json_to_array);
                 return $resp;
 
             } elseif (in_array($content_type, static::$XML_TYPES) || strpos($content_type, '+xml') !== false) {
