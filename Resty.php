@@ -667,10 +667,12 @@ class Resty
 
         // We need last http status
         $statusHeader = null;
-        foreach (array_reverse($meta['wrapper_data']) as $header) {
-            if (strpos($header, 'HTTP') === 0) {
-                $statusHeader = $header;
-                break;
+        if (isset($meta['wrapper_data']) && is_array($meta['wrapper_data'])) {
+            foreach (array_reverse($meta['wrapper_data']) as $header) {
+                if (strpos($header, 'HTTP') === 0) {
+                    $statusHeader = $header;
+                    break;
+                }
             }
         }
 
