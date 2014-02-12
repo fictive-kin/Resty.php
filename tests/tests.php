@@ -1,10 +1,24 @@
 <?php
-use \FUnit\fu;
+use \FUnit as fu;
 
 use \Resty\Resty;
 
 require __DIR__."/FUnit/FUnit.php";
 require __DIR__."/../Resty.php";
+
+define("HTTPBIN_URL", "http://httpbin.org/");
+
+/**
+ * this is an error -> exception handler that is part of a super hack job here
+ * to detect if errors were suppressed or not. Lame.
+ */
+function exception_error_handler($errno, $errstr, $errfile, $errline)
+{
+    if (error_reporting() === 0) {
+        return;
+    }
+    throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+}
 
 fu::setup(function () {
     fu::fixture('resty', new Resty());
@@ -13,7 +27,6 @@ fu::setup(function () {
 fu::teardown(function () {
     fu::reset_fixtures();
 });
-
 
 fu::test('quacks like a duck', function () {
     $r = fu::fixture('resty');
@@ -25,14 +38,78 @@ fu::test('quacks like a duck', function () {
 });
 
 
-fu::test('Silence fopen test', function () {
+fu::test('Un-silence fopen test', function () {
+
+    set_error_handler('exception_error_handler');
 
     $r = fu::fixture('resty');
+    $r->silenceFopenWarning(false);
+
     try {
         $r->get('http://fai9rp9whqrp9b8hqp98bhpwohropsrihbpohtpowhi/');
-    } catch (Exception $e) {
-        fu::ok(is_string($e->getMessage()), "Exception thrown");
+    } catch (\ErrorException $e) {
+        fu::ok(is_string($e->getMessage()), "ErrorException thrown -- not silenced");
+        restore_error_handler();
     }
+
+    restore_error_handler();
+
+});
+
+
+fu::test('Silence fopen test', function () {
+
+    set_error_handler('exception_error_handler');
+
+    $r = fu::fixture('resty');
+    $r->silenceFopenWarning(true);
+
+    try {
+        $r->get('http://fai9rp9whqrp9b8hqp98bhpwohropsrihbpohtpowhi/');
+    } catch (\ErrorException $e) {
+        print $e->getMessage();
+        fu::fail("ErrorException thrown -- not silenced");
+        restore_error_handler();
+    }
+
+    fu::ok(true, "Error silenced");
+    restore_error_handler();
+});
+
+
+fu::test('Raise fopen exception', function () {
+
+    $r = fu::fixture('resty');
+    $r->silenceFopenWarning(true);
+    $r->raiseFopenException(true);
+
+    try {
+        $r->get('http://fai9rp9whqrp9b8hqp98bhpwohropsrihbpohtpowhi/');
+    } catch (\Exception $e) {
+        fu::ok(is_string($e->getMessage()), "Exception thrown");
+        $r->raiseFopenException(false);
+    }
+
+    $r->raiseFopenException(false);
+
+});
+
+
+fu::test('Don\'t raise fopen exception', function () {
+
+    $r = fu::fixture('resty');
+    $r->silenceFopenWarning(true);
+    $r->raiseFopenException(false);
+
+    try {
+        $r->get('http://fai9rp9whqrp9b8hqp98bhpwohropsrihbpohtpowhi/');
+    } catch (\Exception $e) {
+        fu::fail("Exception thrown");
+        $r->silenceFopenWarning(false);
+    }
+
+    fu::ok(true, "No exception thrown");
+    $r->silenceFopenWarning(false);
 
 });
 
@@ -101,6 +178,22 @@ fu::test('gimme bar requests and responses', function () {
     fu::ok(is_int($resp['status']), 'response status should be an integer');
     fu::equal($resp['status'], 200, 'response status should be 200');
     fu::ok($resp['body'] instanceof \StdClass, 'Response body should be a StdClass');
+
+});
+
+fu::test('httpin GET status responses', function () {
+
+    $r = fu::fixture('resty');
+    $r->setBaseURL(HTTPBIN_URL);
+
+    $resp = $r->get('status/200');
+    fu::strict_equal(200, $resp['status'], "Status is 200");
+
+    $resp = $r->get('status/404');
+    fu::strict_equal(404, $resp['status'], "Status is 404");
+
+    $resp = $r->get('status/500');
+    fu::strict_equal(500, $resp['status'], "Status is 500");
 
 });
 
