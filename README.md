@@ -117,3 +117,18 @@ To automatically check against the PSR-2 standard in Sublime Text, you can use t
             "-n": ""
         }
     }
+
+
+## Generating API docs
+
+1. Download `phpDocumentor.phar` into the root project directory:
+  ```
+  curl -O http://phpdoc.org/phpDocumentor.phar
+  ```
+  *Note: we don't install phpDocumentor with composer to avoid the numerous dependencies it introduces into the project*
+
+
+2. Generate the API docs:
+  ```
+  php phpDocumentor.phar -d src/ -t docs/api --template clean
+  ```
