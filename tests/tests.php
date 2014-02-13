@@ -181,7 +181,7 @@ fu::test('gimme bar requests and responses', function () {
 
 });
 
-fu::test('httpin GET status responses', function () {
+fu::test('httpbin.org GET status responses', function () {
 
     $r = fu::fixture('resty');
     $r->setBaseURL(HTTPBIN_URL);
@@ -197,7 +197,7 @@ fu::test('httpin GET status responses', function () {
 
 });
 
-fu::test('httpin GET JSON decoding', function () {
+fu::test('httpbin.org GET JSON decoding', function () {
 
     $r = fu::fixture('resty');
     $r->setBaseURL(HTTPBIN_URL);
@@ -214,7 +214,7 @@ fu::test('httpin GET JSON decoding', function () {
 
 });
 
-fu::test('httpin POST form stuff', function () {
+fu::test('httpbin.org POST form stuff', function () {
 
     $r = fu::fixture('resty');
     $r->setBaseURL(HTTPBIN_URL);
@@ -228,15 +228,54 @@ fu::test('httpin POST form stuff', function () {
 
 });
 
-fu::test('httpin POST JSON stuff', function () {
+fu::test('httpbin.org POST JSON stuff', function () {
 
     $r = fu::fixture('resty');
     $r->setBaseURL(HTTPBIN_URL);
 
     $resp = $r->postJson("post", array("foo"=>"bar", "foo2"=>"bar2"));
-
     $req = $r->getLastRequest();
     fu::strict_equal('application/json', $req['headers']['Content-Type'], "Request Content-Type is application/json");
+    fu::strict_equal('POST', $req['method'], "Request method is POST");
+
+    fu::has("json", $resp['body']);
+    fu::has("foo", $resp['body']->json, "foo is in json data");
+    fu::has("foo2", $resp['body']->json, "foo2 is in json data");
+    fu::strict_equal("bar", $resp['body']->json->foo, "foo value is correct");
+    fu::strict_equal("bar2", $resp['body']->json->foo2, "foo2 value is correct");
+
+});
+
+fu::test('httpbin.org PUT JSON stuff', function () {
+
+    $r = fu::fixture('resty');
+    $r->setBaseURL(HTTPBIN_URL);
+
+    $resp = $r->putJson("put", array("foo"=>"bar", "foo2"=>"bar2"));
+    $req = $r->getLastRequest();
+    fu::strict_equal('application/json', $req['headers']['Content-Type'], "Request Content-Type is application/json");
+    fu::strict_equal('PUT', $req['method'], "Request method is PUT");
+
+    fu::has("json", $resp['body']);
+    fu::has("foo", $resp['body']->json, "foo is in json data");
+    fu::has("foo2", $resp['body']->json, "foo2 is in json data");
+    fu::strict_equal("bar", $resp['body']->json->foo, "foo value is correct");
+    fu::strict_equal("bar2", $resp['body']->json->foo2, "foo2 value is correct");
+
+});
+
+fu::test('httpbin.org PATCH JSON stuff', function () {
+
+    $r = fu::fixture('resty');
+    $r->setBaseURL(HTTPBIN_URL);
+
+    $resp = $r->patchJson("patch", array("foo"=>"bar", "foo2"=>"bar2"));
+    $req = $r->getLastRequest();
+
+    print_r($req);
+    print_r($resp);
+    fu::strict_equal('application/json', $req['headers']['Content-Type'], "Request Content-Type is application/json");
+    fu::strict_equal('PATCH', $req['method'], "Request method is PATCH");
 
     fu::has("json", $resp['body']);
     fu::has("foo", $resp['body']->json, "foo is in json data");

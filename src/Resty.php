@@ -325,11 +325,63 @@ class Resty
      */
     public function postJson($url, $structure = null, $headers = null, $options = null)
     {
+        return $this->sendJsonRequest($url, 'POST', $structure, $headers, $options);
+    }
+
+    /**
+     * make a PUT request with a JSON body.
+     *
+     * The Content-Type header will be set to 'application/json'
+     *
+     * @param  string       $url the URL. This will be appended to the base_url, if any set
+     * @param  array|stdClass $structure the array or object to send as JSON
+     * @param  array        $headers hash of key/val pairs
+     * @param  array        $options hash of key/val pairs ('timeout')
+     * @return array        the response hash
+     * @see    Resty::sendRequest() the method that sends a request
+     */
+    public function putJson($url, $structure = null, $headers = null, $options = null)
+    {
+        return $this->sendJsonRequest($url, 'PUT', $structure, $headers, $options);
+    }
+
+    /**
+     * make a PATCH request with a JSON body.
+     *
+     * The Content-Type header will be set to 'application/json'
+     *
+     * @param  string       $url the URL. This will be appended to the base_url, if any set
+     * @param  array|stdClass $structure the array or object to send as JSON
+     * @param  array        $headers hash of key/val pairs
+     * @param  array        $options hash of key/val pairs ('timeout')
+     * @return array        the response hash
+     * @see    Resty::sendRequest() the method that sends a request
+     */
+    public function patchJson($url, $structure = null, $headers = null, $options = null)
+    {
+        return $this->sendJsonRequest($url, 'PATCH', $structure, $headers, $options);
+    }
+
+    /**
+     * A wrapper for Resty::sendRequest that encodes the $structure as JSON
+     * and sets the Content-Type header will be set to 'application/json'
+     *
+     * @param  string       $url the URL. This will be appended to the base_url, if any set
+     * @param  string       $method  the HTTP method. This should really only be (POST|PUT|PATCH)
+     * @param  array|stdClass $structure the array or object to send as JSON
+     * @param  array        $headers hash of key/val pairs
+     * @param  array        $options hash of key/val pairs ('timeout')
+     * @return array        the response hash
+     * @see    Resty::sendRequest() the method that sends a request
+     * @author Ed Finkler
+     */
+    protected function sendJsonRequest($url, $method, $structure = null, $headers = null, $options = null)
+    {
         if (!$headers) {
             $headers = array();
         }
         $headers['Content-Type'] = 'application/json';
-        return $this->sendRequest($url, 'POST', json_encode($structure), $headers, $options);
+        return $this->sendRequest($url, $method, json_encode($structure), $headers, $options);
     }
 
 
