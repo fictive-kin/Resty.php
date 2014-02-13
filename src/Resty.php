@@ -300,6 +300,28 @@ class Resty
     }
 
     /**
+     * make a POST request with a JSON body.
+     *
+     * The Content-Type header will be set to 'application/json'
+     *
+     * @param  string       $url the URL. This will be appended to the base_url, if any set
+     * @param  array|stdClass $structure the array or object to send as JSON
+     * @param  array        $headers hash of key/val pairs
+     * @param  array        $options hash of key/val pairs ('timeout')
+     * @return array        the response hash
+     * @see    Resty::sendRequest()
+     */
+    public function postJson($url, $structure = null, $headers = null, $options = null)
+    {
+        if (!$headers) {
+            $headers = array();
+        }
+        $headers['Content-Type'] = 'application/json';
+        return $this->sendRequest($url, 'POST', json_encode($structure), $headers, $options);
+    }
+
+
+    /**
      * @param  string $url
      * @param  array  $files
      * @param  array  $params
