@@ -98,10 +98,10 @@ class Resty
     protected $raise_fopen_exception = false;
 
     /**
-     * by default, send X-HTTP-Method-Override header for PATCH requests.
+     * if true, send X-HTTP-Method-Override header for PATCH requests. default is false
      * @var boolean
      */
-    protected $supports_patch = false;
+    protected $supports_patch = true;
 
     /**
      * by default, convert decoded JSON to an object of StdClass. If true,
@@ -142,7 +142,7 @@ class Resty
      * * $opts['onResponseLog'] - an anonymous function that takes the Resty::last_response property as arg
      * * $opts['silence_fopen_warning'] - boolean: silence warnings from fopen when trying to open stream
      * * $opts['raise_fopen_exception'] - boolean: raise an exception from fopen if trying to open stream fails
-     * * $opts['supports_patch'] - boolean: set to true if the REST end point you're connecting to supports PATCH. False will use the X-HTTP-Method-Override header.
+     * * $opts['supports_patch'] - boolean: set to false if the REST end point you're connecting to does not support PATCH -- will use the X-HTTP-Method-Override header.
      * * $opts['json_to_array'] - boolean: set to true if decoded JSON should be an array, not an object
      *
      * @see   Resty::last_request   the property that stores the last request
