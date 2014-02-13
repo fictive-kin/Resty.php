@@ -21,7 +21,7 @@ var_dump($resp['body_raw']);
 
 
 /**
- * Resty::postJson() encodes the object or array as JSON and sends it as 
+ * Resty::postJson() encodes the object or array as JSON and sends it as
  * the request body.
  */
 $to_json = array(
