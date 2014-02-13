@@ -15,7 +15,10 @@
 	"require": {
 		"php": ">=5.3.0"
 	},
+	"require-dev": {
+		"funkatron/funit": "dev-master"
+	},
 	"autoload": {
-		"psr-0": { "Resty": "" }
+		"psr-4": { "Resty\\": "src" }
 	}
 }
