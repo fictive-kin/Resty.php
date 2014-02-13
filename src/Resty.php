@@ -1,9 +1,13 @@
 <?php
+/**
+ * The source file for Resty
+ */
+
 
 namespace Resty;
 
 /**
- * A simple PHP library for doing RESTful HTTP stuff. Does *not* require the curl extension.
+ * A simple PHP library for doing RESTful HTTP stuff. Does not require the curl extension.
  * @link https://github.com/fictivekin/resty.php
  */
 class Resty
@@ -12,10 +16,16 @@ class Resty
     /**
      * The version of this lib
      */
-    const VERSION = '0.6.0';
+    const VERSION = '0.6.1';
 
+    /**
+     * the default timeout for requests, in seconds
+     */
     const DEFAULT_TIMEOUT = 240;
 
+    /**
+     * the default maximum number of redirects
+     */
     const DEFAULT_MAX_REDIRECTS = 0;
 
     /**
@@ -25,7 +35,7 @@ class Resty
 
     /**
      * logging function (should be a Closure)
-     * @var Closure
+     * @var \Closure
      */
     protected $logger = null;
 
@@ -35,13 +45,13 @@ class Resty
     protected $parse_body = true;
 
     /**
-     * @var string
-     * @see Resty::getUserAgent()
+     * @var string The user agent sent with the request
+     * @see Resty::getUserAgent()   the method that retrieves the current user agent
      */
     protected $user_agent = null;
 
     /**
-     * @var string
+     * @var string the base url used to construct request endpoints
      */
     protected $base_url;
 
@@ -125,17 +135,19 @@ class Resty
     );
 
     /**
-     * Passed opts can include
-     * $opts['onRequestLog'] - an anonymous function that takes the Resty::last_request property as arg
-     * $opts['onResponseLog'] - an anonymous function that takes the Resty::last_response property as arg
-     * $opts['silence_fopen_warning'] - boolean: silence warnings from fopen when trying to open stream
-     * $opts['raise_fopen_exception'] - boolean: raise an exception from fopen if trying to open stream fails
-     * $opts['supports_patch'] - boolean: set to true if the REST end point you're connecting to supports PATCH. False will use the X-HTTP-Method-Override header.
-     * $opts['json_to_array'] - boolean: set to true if decoded JSON should be an array, not an object
+     * Class constructor
      *
-     * @see   Resty::last_request
-     * @see   Resty::last_response
-     * @see   Resty::sendRequest()
+     * Passed `opts` can include:
+     * * $opts['onRequestLog'] - an anonymous function that takes the Resty::last_request property as arg
+     * * $opts['onResponseLog'] - an anonymous function that takes the Resty::last_response property as arg
+     * * $opts['silence_fopen_warning'] - boolean: silence warnings from fopen when trying to open stream
+     * * $opts['raise_fopen_exception'] - boolean: raise an exception from fopen if trying to open stream fails
+     * * $opts['supports_patch'] - boolean: set to true if the REST end point you're connecting to supports PATCH. False will use the X-HTTP-Method-Override header.
+     * * $opts['json_to_array'] - boolean: set to true if decoded JSON should be an array, not an object
+     *
+     * @see   Resty::last_request   the property that stores the last request
+     * @see   Resty::last_response  the property that stores the last response
+     * @see   Resty::sendRequest()  the method that sends a request
      * @param array $opts OPTIONAL array of options
      */
     public function __construct($opts = null)
@@ -163,7 +175,7 @@ class Resty
     /**
      * retrieve the last request we sent
      *
-     * valid keys are ['url', 'method', 'querydata', 'headers', 'options', 'opts']
+     * valid keys are `['url', 'method', 'querydata', 'headers', 'options', 'opts']`
      *
      * @param  string $key just retrieve a given field from the hash
      * @return mixed
@@ -228,11 +240,11 @@ class Resty
      * make a GET request
      *
      * @param  string       $url the URL. This will be appended to the base_url, if any set
-     * @param  array|string $querydata hash of key/val pairs
+     * @param  array|string $querydata hash of key/val pairs. This will be appended to the URL
      * @param  array        $headers hash of key/val pairs
      * @param  array        $options hash of key/val pairs ('timeout')
      * @return array        the response hash
-     * @see    Resty::sendRequest()
+     * @see    Resty::sendRequest() the method that sends a request
      */
     public function get($url, $querydata = null, $headers = null, $options = null)
     {
@@ -243,11 +255,11 @@ class Resty
      * make a POST request
      *
      * @param  string       $url the URL. This will be appended to the base_url, if any set
-     * @param  array|string $querydata hash of key/val pairs
+     * @param  array|string $querydata hash of key/val pairs. This will be sent in the request body
      * @param  array        $headers hash of key/val pairs
      * @param  array        $options hash of key/val pairs ('timeout')
      * @return array        the response hash
-     * @see    Resty::sendRequest()
+     * @see    Resty::sendRequest() the method that sends a request
      */
     public function post($url, $querydata = null, $headers = null, $options = null)
     {
@@ -258,11 +270,11 @@ class Resty
      * make a PUT request
      *
      * @param  string       $url the URL. This will be appended to the base_url, if any set
-     * @param  array|string $querydata hash of key/val pairs
+     * @param  array|string $querydata hash of key/val pairs. This will be sent in the request body
      * @param  array        $headers hash of key/val pairs
      * @param  array        $options hash of key/val pairs ('timeout')
      * @return array        the response hash
-     * @see    Resty::sendRequest()
+     * @see    Resty::sendRequest() the method that sends a request
      */
     public function put($url, $querydata = null, $headers = null, $options = null)
     {
@@ -273,11 +285,11 @@ class Resty
      * make a PATCH request
      *
      * @param  string       $url the URL. This will be appended to the base_url, if any set
-     * @param  array|string $querydata hash of key/val pairs
+     * @param  array|string $querydata hash of key/val pairs. This will be sent in the request body
      * @param  array        $headers hash of key/val pairs
      * @param  array        $options hash of key/val pairs ('timeout')
      * @return array        the response hash
-     * @see    Resty::sendRequest()
+     * @see    Resty::sendRequest() the method that sends a request
      */
     public function patch($url, $querydata = null, $headers = null, $options = null)
     {
@@ -288,11 +300,11 @@ class Resty
      * make a DELETE request
      *
      * @param  string       $url the URL. This will be appended to the base_url, if any set
-     * @param  array|string $querydata hash of key/val pairs
+     * @param  array|string $querydata hash of key/val pairs. This will be appended to the URL
      * @param  array        $headers hash of key/val pairs
      * @param  array        $options hash of key/val pairs ('timeout')
      * @return array        the response hash
-     * @see    Resty::sendRequest()
+     * @see    Resty::sendRequest() the method that sends a request
      */
     public function delete($url, $querydata = null, $headers = null, $options = null)
     {
@@ -309,7 +321,7 @@ class Resty
      * @param  array        $headers hash of key/val pairs
      * @param  array        $options hash of key/val pairs ('timeout')
      * @return array        the response hash
-     * @see    Resty::sendRequest()
+     * @see    Resty::sendRequest() the method that sends a request
      */
     public function postJson($url, $structure = null, $headers = null, $options = null)
     {
@@ -322,17 +334,20 @@ class Resty
 
 
     /**
+     *
+     * POST one or more files
+     *
+     * The $files array should be a set of key/val pairs, with the key being
+     * the field name, and the val the file path. ex:
+     * $files['avatar'] = '/path/to/file.jpg';
+     * $files['background'] = '/path/to/file2.jpg';
+     *
      * @param  string $url
      * @param  array  $files
      * @param  array  $params
      * @param  array  $headers
      * @param  array  $options
      * @return array
-     *
-     * The $files array should be a set of key/val pairs, with the key being
-     * the field name, and the val the file path. ex:
-     * $files['avatar'] = '/path/to/file.jpg';
-     * $files['background'] = '/path/to/file2.jpg';
      *
      */
     public function postFiles($url, $files, $params = null, $headers = null, $options = null)
@@ -372,12 +387,8 @@ class Resty
     }
 
     /**
-     * @param  string $url
-     * @param  array  $binary_data
-     * @param  array  $params
-     * @param  array  $headers
-     * @param  array  $options
-     * @return array
+     *
+     * POST binary data directly, without reading from file(s)
      *
      * The $binary_data array should be a set of key/val pairs, with the key being
      * the field name, and the val the binary data. ex:
@@ -387,6 +398,12 @@ class Resty
      * with that data, a multipart POST body is created, identical to a file
      * upload, just without reading the data from a file
      *
+     * @param  string $url
+     * @param  array  $binary_data
+     * @param  array  $params
+     * @param  array  $headers
+     * @param  array  $options
+     * @return array
      */
     public function postBinary($url, $binary_data, $params = null, $headers = null, $options = null)
     {
@@ -424,7 +441,6 @@ class Resty
     }
 
     /**
-     * @see Resty::postFiles()
      *
      * Stole this from the Amazon S3 class:
      *
@@ -453,6 +469,8 @@ class Resty
      *
      * Amazon S3 is a trademark of Amazon.com, Inc. or its affiliates.
      *
+     * @param string $filepath the path to the file
+     * @see   Resty::postFiles()    the method to post files
      */
     protected function getMimeType($filepath)
     {
@@ -936,8 +954,8 @@ class Resty
      *
      * @param  string $resp
      * @return string|object
-     * @see    Resty::$JSON_TYPES
-     * @see    Resty::$XML_TYPES
+     * @see    Resty::$JSON_TYPES   the array of valid JSON contenty types
+     * @see    Resty::$XML_TYPES    the array of valid XML contenty types
      */
     protected function processResponseBody($resp)
     {
@@ -991,8 +1009,11 @@ class Resty
     }
 
     /**
+     * The wrapper method for logging. Either calls a custom logger or
+     * Resty::defaultLogger()
      * @param  mixed $msg
      * @return array
+     * @see    Resty::defaultLogger()   The default logging method
      */
     protected function log($msg)
     {
