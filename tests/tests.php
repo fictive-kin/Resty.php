@@ -214,5 +214,36 @@ fu::test('httpin GET JSON decoding', function () {
 
 });
 
+fu::test('httpin POST form stuff', function () {
+
+    $r = fu::fixture('resty');
+    $r->setBaseURL(HTTPBIN_URL);
+
+    $resp = $r->post("post", array("foo"=>"bar", "foo2"=>"bar2"));
+    fu::has("form", $resp['body']);
+    fu::has("foo", $resp['body']->form, "foo is in form data");
+    fu::has("foo2", $resp['body']->form, "foo2 is in form data");
+    fu::strict_equal("bar", $resp['body']->form->foo, "foo value is correct");
+    fu::strict_equal("bar2", $resp['body']->form->foo2, "foo2 value is correct");
+
+});
+
+fu::test('httpin POST JSON stuff', function () {
+
+    $r = fu::fixture('resty');
+    $r->setBaseURL(HTTPBIN_URL);
+
+    $resp = $r->postJson("post", array("foo"=>"bar", "foo2"=>"bar2"));
+
+    $req = $r->getLastRequest();
+    fu::strict_equal('application/json', $req['headers']['Content-Type'], "Request Content-Type is application/json");
+
+    fu::has("json", $resp['body']);
+    fu::has("foo", $resp['body']->json, "foo is in json data");
+    fu::has("foo2", $resp['body']->json, "foo2 is in json data");
+    fu::strict_equal("bar", $resp['body']->json->foo, "foo value is correct");
+    fu::strict_equal("bar2", $resp['body']->json->foo2, "foo2 value is correct");
+
+});
 
 fu::run();
