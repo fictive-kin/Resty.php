@@ -14,12 +14,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/funkatron/FUnit.git",
-                "reference": "f2a8e3762a2a5424e2dca746d3ffdc05470e48fe"
+                "reference": "ca31f86ef0adc00df9ee2477cb9f8d4f0448acec"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/funkatron/FUnit/zipball/f2a8e3762a2a5424e2dca746d3ffdc05470e48fe",
-                "reference": "f2a8e3762a2a5424e2dca746d3ffdc05470e48fe",
+                "url": "https://api.github.com/repos/funkatron/FUnit/zipball/ca31f86ef0adc00df9ee2477cb9f8d4f0448acec",
+                "reference": "ca31f86ef0adc00df9ee2477cb9f8d4f0448acec",
                 "shasum": ""
             },
             "require": {
@@ -47,7 +47,7 @@
                 "test",
                 "unit"
             ],
-            "time": "2013-10-14 17:54:08"
+            "time": "2014-02-12 19:13:38"
         }
     ],
     "aliases": [
