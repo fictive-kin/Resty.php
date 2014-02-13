@@ -139,19 +139,19 @@
                                 <div class="accordion" style="margin-bottom: 0">
         <div class="accordion-group">
             <div class="accordion-heading">
-                                    <a class="accordion-toggle " data-toggle="collapse" data-target="#namespace-1876898285"></a>
+                                    <a class="accordion-toggle " data-toggle="collapse" data-target="#namespace-111311586"></a>
                                 <a href="../namespaces/default.html" style="margin-left: 30px; padding-left: 0">\</a>
             </div>
-            <div id="namespace-1876898285" class="accordion-body collapse in">
+            <div id="namespace-111311586" class="accordion-body collapse in">
                 <div class="accordion-inner">
 
                                                     <div class="accordion" style="margin-bottom: 0">
         <div class="accordion-group">
             <div class="accordion-heading">
-                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-169469366"></a>
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1664175741"></a>
                                 <a href="../namespaces/Resty.html" style="margin-left: 30px; padding-left: 0">Resty</a>
             </div>
-            <div id="namespace-169469366" class="accordion-body collapse ">
+            <div id="namespace-1664175741" class="accordion-body collapse ">
                 <div class="accordion-inner">
 
                     
@@ -211,6 +211,8 @@
                                                                     <a href="../classes/Resty.Resty.html#method_patch" class="">patch()</a><br />
                                                                     <a href="../classes/Resty.Resty.html#method_delete" class="">delete()</a><br />
                                                                     <a href="../classes/Resty.Resty.html#method_postJson" class="">postJson()</a><br />
+                                                                    <a href="../classes/Resty.Resty.html#method_putJson" class="">putJson()</a><br />
+                                                                    <a href="../classes/Resty.Resty.html#method_patchJson" class="">patchJson()</a><br />
                                                                     <a href="../classes/Resty.Resty.html#method_postFiles" class="">postFiles()</a><br />
                                                                     <a href="../classes/Resty.Resty.html#method_postBinary" class="">postBinary()</a><br />
                                                                     <a href="../classes/Resty.Resty.html#method_enableDebugging" class="">enableDebugging()</a><br />
@@ -241,6 +243,7 @@
                         </section>
                         <section class="row-fluid protected">
                             <section class="span4">
+                                                                    <a href="../classes/Resty.Resty.html#method_sendJsonRequest" class="">sendJsonRequest()</a><br />
                                                                     <a href="../classes/Resty.Resty.html#method_getMimeType" class="">getMimeType()</a><br />
                                                                     <a href="../classes/Resty.Resty.html#method_buildHeadersArray" class="">buildHeadersArray()</a><br />
                                                                     <a href="../classes/Resty.Resty.html#method_metaToHeaders" class="">metaToHeaders()</a><br />
@@ -843,7 +846,7 @@
             <article class="property">
                 <h3 class="protected ">$supports_patch</h3>
                 <pre class="signature">$supports_patch : boolean</pre>
-                <p><em>by default, send X-HTTP-Method-Override header for PATCH requests.</em></p>
+                <p><em>if true, send X-HTTP-Method-Override header for PATCH requests. default is false</em></p>
                 
 
                                 <h4>Type</h4>
@@ -919,7 +922,7 @@ convert to an array.</em></p>
 <li>$opts['onResponseLog'] - an anonymous function that takes the Resty::last_response property as arg</li>
 <li>$opts['silence_fopen_warning'] - boolean: silence warnings from fopen when trying to open stream</li>
 <li>$opts['raise_fopen_exception'] - boolean: raise an exception from fopen if trying to open stream fails</li>
-<li>$opts['supports_patch'] - boolean: set to true if the REST end point you're connecting to supports PATCH. False will use the X-HTTP-Method-Override header.</li>
+<li>$opts['supports_patch'] - boolean: set to false if the REST end point you're connecting to does not support PATCH -- will use the X-HTTP-Method-Override header.</li>
 <li>$opts['json_to_array'] - boolean: set to true if decoded JSON should be an array, not an object</li>
 </ul>
 
@@ -1383,6 +1386,124 @@ convert to an array.</em></p>
                 <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
                 <pre class="signature" style="margin-right: 54px;">postJson(string <span class="argument">$url</span>, array|\Resty\stdClass <span class="argument">$structure</span>, array <span class="argument">$headers</span>, array <span class="argument">$options</span>) : array</pre>
                 <p><em>make a POST request with a JSON body.</em></p>
+                <p>The Content-Type header will be set to 'application/json'</p>
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>string</td>
+                                <td>$url</td>
+                                <td><p>the URL. This will be appended to the base_url, if any set</p></td>
+                            </tr>
+                                                    <tr>
+                                <td>array|\Resty\stdClass</td>
+                                <td>$structure</td>
+                                <td><p>the array or object to send as JSON</p></td>
+                            </tr>
+                                                    <tr>
+                                <td>array</td>
+                                <td>$headers</td>
+                                <td><p>hash of key/val pairs</p></td>
+                            </tr>
+                                                    <tr>
+                                <td>array</td>
+                                <td>$options</td>
+                                <td><p>hash of key/val pairs ('timeout')</p></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    array
+                                            &mdash; <p>the response hash</p>
+                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                                            <dt>See also</dt>
+                                                                <dd><a href="../classes/Resty.Resty.html#method_sendRequest"><span class="namespace-wrapper">the method that sends a request</span></a></dd>
+                                                                </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            todo
+                        </th>
+                        <td>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_putJson" name="method_putJson" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">putJson()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">putJson(string <span class="argument">$url</span>, array|\Resty\stdClass <span class="argument">$structure</span>, array <span class="argument">$headers</span>, array <span class="argument">$options</span>) : array</pre>
+                <p><em>make a PUT request with a JSON body.</em></p>
+                <p>The Content-Type header will be set to 'application/json'</p>
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>string</td>
+                                <td>$url</td>
+                                <td><p>the URL. This will be appended to the base_url, if any set</p></td>
+                            </tr>
+                                                    <tr>
+                                <td>array|\Resty\stdClass</td>
+                                <td>$structure</td>
+                                <td><p>the array or object to send as JSON</p></td>
+                            </tr>
+                                                    <tr>
+                                <td>array</td>
+                                <td>$headers</td>
+                                <td><p>hash of key/val pairs</p></td>
+                            </tr>
+                                                    <tr>
+                                <td>array</td>
+                                <td>$options</td>
+                                <td><p>hash of key/val pairs ('timeout')</p></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    array
+                                            &mdash; <p>the response hash</p>
+                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                                            <dt>See also</dt>
+                                                                <dd><a href="../classes/Resty.Resty.html#method_sendRequest"><span class="namespace-wrapper">the method that sends a request</span></a></dd>
+                                                                </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            todo
+                        </th>
+                        <td>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_patchJson" name="method_patchJson" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">patchJson()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">patchJson(string <span class="argument">$url</span>, array|\Resty\stdClass <span class="argument">$structure</span>, array <span class="argument">$headers</span>, array <span class="argument">$options</span>) : array</pre>
+                <p><em>make a PATCH request with a JSON body.</em></p>
                 <p>The Content-Type header will be set to 'application/json'</p>
 
                                     <h4>Parameters</h4>
@@ -2177,6 +2298,79 @@ converts to object.</em></p>
 
                                                     <div class="row-fluid">
         <div class="span8 content class">
+            <a id="method_sendJsonRequest" name="method_sendJsonRequest" class="anchor"></a>
+            <article class="method">
+                <h3 class="protected ">sendJsonRequest()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">sendJsonRequest(string <span class="argument">$url</span>, string <span class="argument">$method</span>, array|\Resty\stdClass <span class="argument">$structure</span>, array <span class="argument">$headers</span>, array <span class="argument">$options</span>) : array</pre>
+                <p><em>A wrapper for Resty::sendRequest that encodes the $structure as JSON
+and sets the Content-Type header will be set to &#039;application/json&#039;</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>string</td>
+                                <td>$url</td>
+                                <td><p>the URL. This will be appended to the base_url, if any set</p></td>
+                            </tr>
+                                                    <tr>
+                                <td>string</td>
+                                <td>$method</td>
+                                <td><p>the HTTP method. This should really only be (POST|PUT|PATCH)</p></td>
+                            </tr>
+                                                    <tr>
+                                <td>array|\Resty\stdClass</td>
+                                <td>$structure</td>
+                                <td><p>the array or object to send as JSON</p></td>
+                            </tr>
+                                                    <tr>
+                                <td>array</td>
+                                <td>$headers</td>
+                                <td><p>hash of key/val pairs</p></td>
+                            </tr>
+                                                    <tr>
+                                <td>array</td>
+                                <td>$options</td>
+                                <td><p>hash of key/val pairs ('timeout')</p></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    array
+                                            &mdash; <p>the response hash</p>
+                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                                            <dt>See also</dt>
+                                                                <dd><a href="../classes/Resty.Resty.html#method_sendRequest"><span class="namespace-wrapper">the method that sends a request</span></a></dd>
+                                                                </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            author
+                        </th>
+                        <td>
+                                                                                            <p>Ed Finkler</p>
+                                                    </td>
+                    </tr>
+                                    <tr>
+                        <th>
+                            todo
+                        </th>
+                        <td>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
             <a id="method_getMimeType" name="method_getMimeType" class="anchor"></a>
             <article class="method">
                 <h3 class="protected ">getMimeType()</h3>
@@ -2639,7 +2833,7 @@ Resty::defaultLogger()</em></p>
                 <section class="span10 offset1">
                     <hr />
                     Documentation is powered by <a href="http://www.phpdoc.org/">phpDocumentor </a> and authored
-                    on February 13th, 2014 at 15:20.
+                    on February 13th, 2014 at 16:01.
                 </section>
             </section>
         </section>
