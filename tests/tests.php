@@ -1,10 +1,10 @@
 <?php
+
+require dirname(__FILE__) . "/../vendor/autoload.php";
+
 use \FUnit as fu;
 
 use \Resty\Resty;
-
-require __DIR__."/FUnit/FUnit.php";
-require __DIR__."/../Resty.php";
 
 define("HTTPBIN_URL", "http://httpbin.org/");
 

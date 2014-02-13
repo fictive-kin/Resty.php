@@ -2,11 +2,37 @@
 
 A simple PHP library for doing RESTful HTTP stuff. Does *not* require the curl extension.
 
+## Installation
+
+Use [composer](https://getcomposer.org/) to install Resty:
+
+1. Install composer into your project:
+```
+curl -s https://getcomposer.org/installer | php
+```
+
+Create a `composer.json` file in your project root:
+
+``` json
+{
+    "require": {
+        "resty/resty": "@stable"
+    }
+}
+```
+
+Install via composer:
+
+```
+php composer.phar install
+```
+
+
 ## Example
 
 ``` php
 <?php
-require __DIR__."/Resty.php";
+require "vendor/autoload.php";
 
 use Resty\Resty;
 
@@ -14,33 +40,33 @@ $resty = new Resty();
 $resty->setBaseURL('http://httpbin.org/');
 $resp = $resty->get('headers');
 
-echo "\n$resp['status']\n";
+echo "\n\$resp['status']:\n";
 var_dump($resp['status']);
 
-echo "\n$resp['headers']\n";
+echo "\n\$resp['headers']:\n";
 var_dump($resp['headers']);
 
-echo "\n$resp['body']\n";
+echo "\n\$resp['body']:\n";
 var_dump($resp['body']);
 
-echo "\n$resp['body_raw']\n";
+echo "\n\$resp['body_raw']:\n";
 var_dump($resp['body_raw']);
 ```
 
 *Output*
 
 ```
-$resp['status']
+$resp['status']:
 int(200)
 
-$resp['headers']
+$resp['headers']:
 array(6) {
   ["Access-Control-Allow-Origin"]=>
   string(1) "*"
   ["Content-Type"]=>
   string(16) "application/json"
   ["Date"]=>
-  string(29) "Wed, 12 Feb 2014 22:05:09 GMT"
+  string(29) "Thu, 13 Feb 2014 15:09:33 GMT"
   ["Server"]=>
   string(15) "gunicorn/0.17.4"
   ["Content-Length"]=>
@@ -49,10 +75,10 @@ array(6) {
   string(5) "Close"
 }
 
-$resp['body']
-object(stdClass)#2 (1) {
+$resp['body']:
+object(stdClass)#3 (1) {
   ["headers"]=>
-  object(stdClass)#3 (5) {
+  object(stdClass)#4 (5) {
     ["Host"]=>
     string(11) "httpbin.org"
     ["Connection"]=>
@@ -60,19 +86,19 @@ object(stdClass)#2 (1) {
     ["Content-Type"]=>
     string(33) "application/x-www-form-urlencoded"
     ["X-Request-Id"]=>
-    string(36) "c9d4ea35-8505-4f04-9fd1-33f56037df8a"
+    string(36) "259dfd8e-6a24-4e77-ae83-9ce50c29ea78"
     ["User-Agent"]=>
     string(11) "Resty 0.6.0"
   }
 }
 
-$resp['body_raw']
+$resp['body_raw']:
 string(225) "{
   "headers": {
     "Host": "httpbin.org",
     "Connection": "close",
     "Content-Type": "application/x-www-form-urlencoded",
-    "X-Request-Id": "c9d4ea35-8505-4f04-9fd1-33f56037df8a",
+    "X-Request-Id": "259dfd8e-6a24-4e77-ae83-9ce50c29ea78",
     "User-Agent": "Resty 0.6.0"
   }
 }"
