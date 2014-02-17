@@ -648,7 +648,7 @@ class Resty
      * sets an alternate logging method
      * @param Closure $logger
      */
-    public function setLogger(Closure $logger)
+    public function setLogger(\Closure $logger)
     {
         $this->logger = $logger;
     }
