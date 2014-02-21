@@ -856,9 +856,11 @@ class Resty
             $content = $querydata;
 
         // else if it's an array, make an http query
-        } elseif (isset($querydata) && is_array($querydata)) {
+        // or if it's an StdClass object, it will be cast to an array
+        //   e.g. json_decode returns an object if not passed $assoc=true
+        } elseif (isset($querydata) && (is_array($querydata) || $querydata instanceof \StdClass)) {
 
-            $content = http_build_query($querydata);
+            $content = http_build_query((array)$querydata);
 
         }
 
