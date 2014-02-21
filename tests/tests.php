@@ -226,6 +226,15 @@ fu::test('httpbin.org POST form stuff', function () {
     fu::strict_equal("bar", $resp['body']->form->foo, "foo value is correct");
     fu::strict_equal("bar2", $resp['body']->form->foo2, "foo2 value is correct");
 
+    // same test, but as an object (json_decoded to be sure)
+    $querydata = json_decode('{"foo":"bar", "foo2":"bar2"}');
+    $resp = $r->post("post", $querydata);
+    fu::has("form", $resp['body']);
+    fu::has("foo", $resp['body']->form, "foo is in form data");
+    fu::has("foo2", $resp['body']->form, "foo2 is in form data");
+    fu::strict_equal("bar", $resp['body']->form->foo, "foo value is correct");
+    fu::strict_equal("bar2", $resp['body']->form->foo2, "foo2 value is correct");
+
 });
 
 fu::test('httpbin.org POST JSON stuff', function () {
